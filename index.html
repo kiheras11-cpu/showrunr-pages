@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Showrunr ⚡ — Event Production, Finally Under Control</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0c12;--card:#1a1d27;--border:#2a2d3a;--text:#e0e0e0;--muted:#888;
+  --blue:#7eb8f7;--purple:#9b7fe8;--green:#4ade80;--yellow:#fbbf24;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden;}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 24px 40px;
+  position:relative;overflow:hidden;
+  text-align:center;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(126,184,247,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+
+/* Logo */
+.logo{font-size:1.1rem;font-weight:900;letter-spacing:.06em;margin-bottom:40px;opacity:.7;}
+.logo span{color:var(--blue);}
+
+/* Headline */
+.eyebrow{
+  font-size:.72rem;text-transform:uppercase;letter-spacing:.18em;color:var(--blue);
+  font-weight:700;margin-bottom:18px;
+}
+h1{
+  font-size:clamp(2rem,5vw,3.4rem);font-weight:900;line-height:1.12;
+  letter-spacing:-.02em;max-width:760px;
+}
+h1 em{color:var(--blue);font-style:normal;}
+.subhead{
+  margin-top:20px;font-size:clamp(.95rem,2vw,1.2rem);color:var(--muted);
+  max-width:560px;line-height:1.6;
+}
+
+/* CTA group */
+.cta-group{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:34px;}
+.btn-primary{
+  background:var(--blue);color:#000;font-weight:800;
+  padding:14px 32px;border-radius:10px;border:none;font-size:1rem;
+  cursor:pointer;text-decoration:none;
+  box-shadow:0 0 40px rgba(126,184,247,.3);
+  transition:transform .15s,box-shadow .15s;
+  display:inline-block;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 60px rgba(126,184,247,.45);}
+.btn-ghost{
+  background:transparent;color:var(--text);font-weight:600;
+  padding:14px 28px;border-radius:10px;border:1px solid var(--border);font-size:1rem;
+  cursor:pointer;text-decoration:none;display:inline-block;
+  transition:border-color .2s,color .2s;
+}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+
+/* Trust pill */
+.trust{margin-top:24px;font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:6px;justify-content:center;}
+.trust-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;}
+
+/* ── DEMO FRAME ── */
+.demo-section{
+  padding:0 24px 80px;display:flex;justify-content:center;
+  position:relative;
+}
+.demo-section::before{
+  content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(155,127,232,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.demo-wrap{
+  position:relative;
+  background:linear-gradient(160deg,#1a1d27 0%,#0d1020 100%);
+  border:1px solid var(--border);border-radius:24px;
+  padding:32px 24px;max-width:880px;width:100%;
+  box-shadow:0 40px 100px rgba(0,0,0,.6);
+  display:flex;flex-direction:column;align-items:center;gap:24px;
+}
+.demo-label{
+  font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;
+  color:var(--blue);font-weight:700;
+}
+.demo-inner{
+  width:100%;display:flex;justify-content:center;align-items:center;
+  position:relative;
+}
+.demo-glow{
+  position:absolute;inset:-40px;
+  background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(126,184,247,.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+iframe.demo-frame{
+  width:375px;height:720px;border:none;border-radius:36px;
+  box-shadow:0 0 0 1px #2a2d3a, 0 40px 80px rgba(0,0,0,.8);
+  flex-shrink:0;
+}
+/* Responsive: shrink phone on mobile */
+@media(max-width:460px){
+  iframe.demo-frame{width:310px;height:596px;border-radius:30px;}
+}
+.demo-caption{font-size:.82rem;color:var(--muted);text-align:center;max-width:460px;line-height:1.6;}
+
+/* ── PROBLEM SECTION ── */
+.section{padding:80px 24px;max-width:900px;margin:0 auto;}
+.section-label{
+  font-size:.68rem;text-transform:uppercase;letter-spacing:.18em;color:var(--purple);
+  font-weight:700;text-align:center;margin-bottom:14px;
+}
+.section h2{
+  font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:800;line-height:1.2;
+  text-align:center;letter-spacing:-.02em;
+}
+.section h2 em{color:var(--blue);font-style:normal;}
+
+/* Pain list */
+.pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:44px;}
+.pain-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px;position:relative;overflow:hidden;
+}
+.pain-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--red, #f87171),transparent);
+}
+.pain-icon{font-size:1.5rem;margin-bottom:10px;}
+.pain-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.pain-card p{font-size:.82rem;color:var(--muted);line-height:1.55;}
+
+/* ── FEATURES ── */
+.features-section{padding:80px 24px;max-width:900px;margin:0 auto;}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:44px;}
+.feature-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px;position:relative;overflow:hidden;transition:border-color .2s;
+}
+.feature-card:hover{border-color:var(--blue)55;}
+.feature-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--blue),var(--purple));
+}
+.feature-icon{font-size:1.6rem;margin-bottom:12px;}
+.feature-card h4{font-size:.95rem;font-weight:700;margin-bottom:6px;}
+.feature-card p{font-size:.82rem;color:var(--muted);line-height:1.55;}
+
+/* ── SOCIAL PROOF ── */
+.social-section{padding:60px 24px;max-width:900px;margin:0 auto;}
+.quotes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:40px;}
+.quote-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:22px;
+}
+.stars{color:var(--yellow);font-size:.85rem;margin-bottom:12px;letter-spacing:2px;}
+.quote-text{font-size:.88rem;line-height:1.6;color:#ccc;margin-bottom:16px;}
+.quote-author{display:flex;align-items:center;gap:10px;}
+.author-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;}
+.author-info h5{font-size:.82rem;font-weight:700;}
+.author-info p{font-size:.72rem;color:var(--muted);}
+
+/* ── FINAL CTA ── */
+.cta-section{
+  padding:100px 24px;text-align:center;
+  background:linear-gradient(180deg,transparent 0%,rgba(126,184,247,.04) 50%,transparent 100%);
+}
+.cta-section h2{
+  font-size:clamp(1.8rem,4vw,3rem);font-weight:900;line-height:1.15;
+  letter-spacing:-.02em;max-width:640px;margin:0 auto 20px;
+}
+.cta-section h2 em{color:var(--blue);font-style:normal;}
+.cta-section p{font-size:1rem;color:var(--muted);margin-bottom:36px;line-height:1.6;}
+.cta-note{margin-top:16px;font-size:.75rem;color:var(--muted);}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);padding:30px 24px;
+  text-align:center;font-size:.75rem;color:var(--muted);
+}
+footer strong{color:var(--text);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<section class="hero">
+  <div class="logo"><span>Show</span>runr ⚡</div>
+
+  <div class="eyebrow">The Event Production Platform</div>
+  <h1>Stop Running Shows<br>With <em>Group Texts and Spreadsheets</em></h1>
+  <p class="subhead">
+    Showrunr gives your whole team — management, crew, and warehouse ops — one live view of every show. From booking to strike, nothing slips through the cracks.
+  </p>
+
+  <div class="cta-group">
+    <a href="showrunr.html" class="btn-primary">See It in Action →</a>
+    <a href="mailto:kiheras@icloud.com?subject=Showrunr%20Demo%20Request" class="btn-ghost">Book a Demo Call</a>
+  </div>
+
+  <div class="trust">
+    <span class="trust-dot"></span>
+    Free beta access · No credit card · Built by people who've worked shows
+  </div>
+</section>
+
+<!-- ══════════════════ LIVE DEMO ══════════════════ -->
+<div class="demo-section">
+  <div class="demo-wrap">
+    <div class="demo-label">✦ Live Demo — Watch It Work</div>
+
+    <div class="demo-inner">
+      <div class="demo-glow"></div>
+      <iframe
+        class="demo-frame"
+        src="demo.html"
+        title="Showrunr Interactive Demo"
+        scrolling="no"
+        loading="lazy"
+      ></iframe>
+    </div>
+
+    <p class="demo-caption">
+      From booking to wrap — a full show lifecycle in under two minutes. This isn't a mockup. It's the actual app.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════ PROBLEM ══════════════════ -->
+<div class="section">
+  <div class="section-label">Sound familiar?</div>
+  <h2>Every Show Runs on <em>Chaos</em><br>Until Something Breaks</h2>
+
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-icon">📱</div>
+      <h4>The Group Chat Disaster</h4>
+      <p>Call times buried in 200 messages. Half your crew saw the wrong load-in time. Again.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">📋</div>
+      <h4>Pull Sheet Roulette</h4>
+      <p>Three different spreadsheet versions. Nobody knows which one's current. Gear shows up wrong.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">❓</div>
+      <h4>Day-of Blindness</h4>
+      <p>You're running the show and have zero visibility into what's actually happening on the floor.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">💸</div>
+      <h4>Invoices That Live in Email</h4>
+      <p>Chasing payments after wrap when you should be booking the next show. Classic.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">🔄</div>
+      <h4>Starting From Scratch Every Time</h4>
+      <p>Rebuilding the same crew lists and pull sheets for shows you've run 10 times before.</p>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">😤</div>
+      <h4>Crew in the Dark</h4>
+      <p>Your people don't know their call time, their role, or what gear they're responsible for until you tell them individually.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ FEATURES ══════════════════ -->
+<div class="features-section">
+  <div class="section-label">What Showrunr does</div>
+  <h2>One Platform.<br><em>Every Part of the Show.</em></h2>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">📅</div>
+      <h4>Bookings & CRM</h4>
+      <p>Create jobs in seconds. Track every client, every venue, every dollar. Your pipeline in one place.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👥</div>
+      <h4>Crew Scheduling</h4>
+      <p>Assign roles, send confirmations, track availability. Everyone knows exactly where to be and when.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏗️</div>
+      <h4>Live Pull Sheets</h4>
+      <p>Itemized gear lists with real-time packing status. Warehouse sees exactly what goes on which truck.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⏱️</div>
+      <h4>Day-of Timeline</h4>
+      <p>Live show schedule with crew check-ins. Management sees the full picture without a single phone call.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✅</div>
+      <h4>Strike Checklist</h4>
+      <p>Nothing leaves the venue without sign-off. Strike tracked item by item, crew member by crew member.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h4>Wrap Report</h4>
+      <p>Revenue, crew count, incidents — auto-generated the moment strike is complete. Invoice ready to send.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ QUOTES ══════════════════ -->
+<div class="social-section">
+  <div class="section-label">Early beta feedback</div>
+  <h2 style="text-align:center;font-size:clamp(1.5rem,3vw,2rem);font-weight:800;letter-spacing:-.02em;">
+    What Production Teams Are Saying
+  </h2>
+
+  <div class="quotes-grid">
+    <div class="quote-card">
+      <div class="stars">★★★★★</div>
+      <p class="quote-text">"We ran two festivals and a corporate gig in the same weekend. Showrunr was the only reason we didn't lose our minds. Pull sheets alone saved us hours."</p>
+      <div class="quote-author">
+        <div class="author-avatar" style="background:#1a2a3a;color:var(--blue);">NT</div>
+        <div class="author-info"><h5>Nathan T.</h5><p>Production Manager · LIV Golf</p></div>
+      </div>
+    </div>
+    <div class="quote-card">
+      <div class="stars">★★★★★</div>
+      <p class="quote-text">"Finally something built for how shows actually work. Not some generic project management tool with event stickers on it."</p>
+      <div class="quote-author">
+        <div class="author-avatar" style="background:#2a1a3a;color:var(--purple);">EG</div>
+        <div class="author-info"><h5>Eyal G.</h5><p>Owner · One Up Group</p></div>
+      </div>
+    </div>
+    <div class="quote-card">
+      <div class="stars">★★★★★</div>
+      <p class="quote-text">"My crew stopped texting me for call times the first week. That alone was worth it."</p>
+      <div class="quote-author">
+        <div class="author-avatar" style="background:#1a3a2a;color:var(--green);">KL</div>
+        <div class="author-info"><h5>Kevin L.</h5><p>Technical Director · Freelance</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PRICING ══════════════════ -->
+<div class="section" id="pricing" style="max-width:960px;">
+  <div class="section-label">Simple, transparent pricing</div>
+  <h2>Built for Every Scale.<br><em>One Platform.</em></h2>
+  <p style="text-align:center;color:var(--muted);margin-top:14px;font-size:.9rem;">All tiers include a one-time setup fee — we get your team live, not just signed up.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-top:44px;">
+
+    <!-- Assisted -->
+    <div class="feature-card" style="position:relative;">
+      <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700;margin-bottom:10px;">Assisted</div>
+      <div style="font-size:2rem;font-weight:900;letter-spacing:-.03em;">$349<span style="font-size:1rem;font-weight:500;color:var(--muted);">/mo</span></div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">+ $1,400 setup</div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+      <ul style="list-style:none;padding:0;font-size:.82rem;color:#ccc;display:flex;flex-direction:column;gap:8px;">
+        <li>✓ Full crew scheduling</li>
+        <li>✓ Job & client CRM</li>
+        <li>✓ Pull sheets & timeline</li>
+        <li>✓ Wrap reports</li>
+      </ul>
+    </div>
+
+    <!-- Guided -->
+    <div class="feature-card" style="border-color:var(--blue)55;position:relative;">
+      <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--blue);font-weight:700;margin-bottom:10px;">Guided ✦ Popular</div>
+      <div style="font-size:2rem;font-weight:900;letter-spacing:-.03em;">$699<span style="font-size:1rem;font-weight:500;color:var(--muted);">/mo</span></div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">+ $3,000 setup</div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+      <ul style="list-style:none;padding:0;font-size:.82rem;color:#ccc;display:flex;flex-direction:column;gap:8px;">
+        <li>✓ Everything in Assisted</li>
+        <li>✓ AI-assisted scheduling</li>
+        <li>✓ Vendor management layer</li>
+        <li>✓ Priority support</li>
+      </ul>
+    </div>
+
+    <!-- Autonomous -->
+    <div class="feature-card" style="position:relative;">
+      <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--purple);font-weight:700;margin-bottom:10px;">Autonomous</div>
+      <div style="font-size:2rem;font-weight:900;letter-spacing:-.03em;">$1,499<span style="font-size:1rem;font-weight:500;color:var(--muted);">/mo</span></div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">+ $5,000 setup</div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+      <ul style="list-style:none;padding:0;font-size:.82rem;color:#ccc;display:flex;flex-direction:column;gap:8px;">
+        <li>✓ Everything in Guided</li>
+        <li>✓ AI runs pre-show workflow</li>
+        <li>✓ Full automation layer</li>
+        <li>✓ Multi-show ops</li>
+      </ul>
+    </div>
+
+    <!-- Sovereign -->
+    <div class="feature-card" style="border-color:var(--yellow)55;position:relative;">
+      <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--yellow);font-weight:700;margin-bottom:10px;">Sovereign</div>
+      <div style="font-size:2rem;font-weight:900;letter-spacing:-.03em;">$4,200<span style="font-size:1rem;font-weight:500;color:var(--muted);">/mo</span></div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">Setup scoped after discovery</div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0;">
+      <ul style="list-style:none;padding:0;font-size:.82rem;color:#ccc;display:flex;flex-direction:column;gap:8px;">
+        <li>✓ Everything in Autonomous</li>
+        <li>✓ Dedicated ops partner</li>
+        <li>✓ Custom integrations & API</li>
+        <li>✓ SLA + roadmap access</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════ FINAL CTA ══════════════════ -->
+<div class="cta-section">
+  <h2>Ready to Run a <em>Clean Show?</em></h2>
+  <p>Pick your tier. Get set up. Stop running shows on chaos.</p>
+  <div class="cta-group">
+    <a href="showrunr.html" class="btn-primary">Try the Demo App →</a>
+    <a href="mailto:kiheras@icloud.com?subject=Showrunr%20Beta%20Access" class="btn-ghost">Talk to Us First</a>
+  </div>
+  <p class="cta-note">Now onboarding production companies and AV firms. Setup included — we get you live.</p>
+</div>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <strong><span style="color:var(--blue)">Show</span>runr ⚡</strong> — Built by Lucent LLC &nbsp;·&nbsp; kiheras@icloud.com &nbsp;·&nbsp; Arizona, USA<br>
+  <span style="margin-top:8px;display:inline-block;">© 2026 Lucent LLC. All rights reserved.</span>
+</footer>
+
+</body>
+</html>

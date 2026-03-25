@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Showrunr ⚡</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0a0c12;--card:#1a1d27;--border:#2a2d3a;--text:#e0e0e0;--muted:#666;
+  --blue:#7eb8f7;--purple:#9b7fe8;--green:#4ade80;--yellow:#fbbf24;--red:#f87171;
+  --nav-h:64px;--header-h:56px;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;overflow-x:hidden;}
+/* LAYOUT */
+#app{display:flex;flex-direction:column;height:100vh;}
+.header{height:var(--header-h);background:var(--bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;}
+.header h1{font-size:1.3rem;font-weight:800;letter-spacing:.05em;}
+.header h1 span{color:var(--blue);}
+.header-sub{margin-left:auto;font-size:.75rem;color:var(--muted);}
+.content{flex:1;overflow-y:auto;padding:16px;padding-bottom:calc(var(--nav-h) + 16px);}
+/* BOTTOM NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:#13151f;border-top:1px solid var(--border);display:flex;z-index:200;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--muted);font-size:.62rem;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:color .2s;}
+.nav-btn.active{color:var(--blue);}
+.nav-btn svg{width:22px;height:22px;}
+/* TABS */
+.tab{display:none;}
+.tab.active{display:block;}
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+/* BADGES */
+.badge{display:inline-block;font-size:.65rem;padding:3px 8px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.badge-blue{background:#1a2a3a;color:var(--blue);}
+.badge-purple{background:#2a1a3a;color:var(--purple);}
+.badge-green{background:#1a3a2a;color:var(--green);}
+.badge-yellow{background:#3a2a1a;color:var(--yellow);}
+.badge-gray{background:#2a2a2a;color:#aaa;}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:none;font-size:.85rem;font-weight:600;cursor:pointer;transition:opacity .2s;}
+.btn:active{opacity:.7;}
+.btn-primary{background:var(--blue);color:#000;}
+.btn-sm{padding:5px 10px;font-size:.72rem;border-radius:6px;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-scan{background:#1a2a3a;color:var(--blue);border:1px solid var(--blue)22;}
+.btn-danger{background:#3a1a1a;color:var(--red);}
+/* FAB */
+.fab{position:fixed;bottom:calc(var(--nav-h) + 16px);right:16px;width:52px;height:52px;border-radius:50%;background:var(--blue);color:#000;border:none;font-size:1.6rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(126,184,247,.4);z-index:150;transition:transform .2s;}
+.fab:active{transform:scale(.9);}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:flex;align-items:flex-end;}
+.modal-overlay.hidden{display:none;}
+.modal{background:#13151f;border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px;}
+.modal h2{font-size:1.1rem;margin-bottom:16px;color:var(--blue);}
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+.form-group input,.form-group select{width:100%;background:#0a0c12;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:.9rem;outline:none;}
+.form-group input:focus,.form-group select:focus{border-color:var(--blue);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+/* JOB CARDS */
+.job-card{cursor:pointer;transition:border-color .2s;}
+.job-card.selected{border-color:var(--blue);}
+.job-card-header{display:flex;align-items:flex-start;gap:12px;}
+.job-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.job-icon.wedding{background:#2a1a3a;}
+.job-icon.corporate{background:#1a2a3a;}
+.job-icon.festival{background:#1a3a2a;}
+.job-card-info{flex:1;}
+.job-card-info h3{font-size:.95rem;font-weight:700;margin-bottom:2px;}
+.job-meta{font-size:.75rem;color:var(--muted);margin-top:4px;}
+.job-budget{font-size:.85rem;font-weight:700;color:var(--green);margin-top:2px;}
+/* PULL SHEET */
+.progress-bar{background:var(--border);border-radius:100px;height:8px;margin:12px 0;}
+.progress-fill{background:linear-gradient(90deg,var(--blue),var(--purple));border-radius:100px;height:100%;transition:width .4s;}
+.progress-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);}
+.cat-header{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:10px 0 6px;border-bottom:1px solid var(--border);margin-bottom:8px;}
+.eq-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1a1d2740;}
+.eq-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.eq-dot.audio{background:var(--blue);}
+.eq-dot.lighting{background:var(--purple);}
+.eq-dot.power{background:var(--yellow);}
+.eq-name{flex:1;font-size:.85rem;}
+.eq-qty{font-size:.75rem;color:var(--muted);margin-right:6px;}
+/* CREW */
+.crew-section{margin-bottom:20px;}
+.crew-section h3{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;}
+.crew-card{display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;}
+.crew-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0;}
+.crew-info{flex:1;}
+.crew-info h4{font-size:.9rem;font-weight:600;}
+.crew-info p{font-size:.75rem;color:var(--muted);}
+/* TIMELINE */
+.timeline{position:relative;padding-left:28px;}
+.tl-item{position:relative;padding-bottom:20px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-line{position:absolute;left:-19px;top:18px;bottom:-2px;width:2px;background:var(--border);}
+.tl-item.done .tl-line{background:var(--blue);}
+.tl-dot{position:absolute;left:-24px;top:6px;width:12px;height:12px;border-radius:50%;border:2px solid var(--border);background:var(--bg);}
+.tl-item.done .tl-dot{background:var(--blue);border-color:var(--blue);}
+.tl-item.active-ms .tl-dot{background:var(--yellow);border-color:var(--yellow);box-shadow:0 0 8px var(--yellow)44;}
+.tl-content{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:border-color .2s;}
+.tl-item.done .tl-content{border-color:var(--blue)22;}
+.tl-content h4{font-size:.88rem;font-weight:600;}
+.tl-content p{font-size:.75rem;color:var(--muted);margin-top:3px;}
+/* INVENTORY */
+.inv-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #1a1d2740;}
+.inv-name{flex:1;font-size:.85rem;}
+.inv-bar{width:60px;height:5px;background:var(--border);border-radius:100px;overflow:hidden;}
+.inv-bar-fill{height:100%;background:var(--green);border-radius:100px;}
+.inv-stat{font-size:.72rem;text-align:right;min-width:28px;}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.stat-box .num{font-size:1.4rem;font-weight:700;}
+.stat-box .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:2px;}
+/* SEARCH */
+.search{width:100%;background:#13151f;border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.88rem;margin-bottom:14px;outline:none;}
+.search:focus{border-color:var(--blue);}
+/* TOAST */
+#toast{position:fixed;bottom:calc(var(--nav-h) + 80px);left:50%;transform:translateX(-50%) translateY(20px);background:#1a2a3a;color:var(--blue);padding:10px 20px;border-radius:100px;font-size:.82rem;font-weight:600;border:1px solid var(--blue)44;opacity:0;transition:all .3s;z-index:500;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* JOB SELECTOR */
+.job-selector{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px;scrollbar-width:none;}
+.job-selector::-webkit-scrollbar{display:none;}
+.job-chip{flex-shrink:0;padding:6px 12px;border-radius:20px;border:1px solid var(--border);font-size:.75rem;cursor:pointer;transition:all .2s;background:transparent;color:var(--muted);}
+.job-chip.selected{background:var(--blue);color:#000;border-color:var(--blue);font-weight:700;}
+/* SECTION TITLE */
+.section-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-state .icon{font-size:2.5rem;margin-bottom:10px;}
+.login-card:hover{border-color:var(--blue)!important;}
+.login-card:active{transform:scale(.98);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<style>
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:32px 24px;}
+.login-inner{display:flex;align-items:center;gap:60px;width:100%;max-width:900px;}
+.login-demo-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.login-demo-col iframe{width:280px;height:538px;border:none;border-radius:28px;box-shadow:0 0 0 1px #2a2d3a,0 32px 64px rgba(0,0,0,.8);flex-shrink:0;}
+.login-demo-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--blue);font-weight:700;opacity:.7;}
+.login-cards-col{flex:1;display:flex;flex-direction:column;align-items:flex-start;}
+.login-logo{font-size:2rem;font-weight:900;letter-spacing:.05em;margin-bottom:4px;}
+.login-logo span{color:var(--blue);}
+.login-tagline{font-size:.8rem;color:var(--muted);margin-bottom:32px;}
+.login-role-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px;}
+.login-demo-note{margin-top:20px;font-size:.7rem;color:var(--muted);}
+@media(max-width:700px){
+  .login-inner{flex-direction:column;gap:32px;align-items:center;}
+  .login-cards-col{align-items:center;width:100%;}
+  .login-logo,.login-tagline,.login-role-label,.login-demo-note{text-align:center;}
+}
+</style>
+<div id="loginScreen">
+  <div class="login-inner">
+
+    <!-- Left: phone demo -->
+    <div class="login-demo-col">
+      <iframe src="demo.html" scrolling="no" title="Showrunr Demo"></iframe>
+      <div class="login-demo-label">Live demo — watch it work</div>
+    </div>
+
+    <!-- Right: branding + role cards -->
+    <div class="login-cards-col">
+      <div class="login-logo"><span>Show</span>runr ⚡</div>
+      <div class="login-tagline">Event Production Platform</div>
+
+      <div class="login-role-label">Select your role to continue</div>
+
+      <div class="login-card" onclick="setRole('crew')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;cursor:pointer;transition:border-color .2s;width:100%;max-width:380px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:46px;height:46px;border-radius:12px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">👤</div>
+          <div>
+            <div style="font-weight:700;font-size:1rem;">Crew</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">Your show, your role. See what you need, nothing more.</div>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:4px;">Timeline · Pull status · Crew comms · My assignments</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-card" onclick="setRole('ops')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px;cursor:pointer;transition:border-color .2s;width:100%;max-width:380px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:46px;height:46px;border-radius:12px;background:#1a3a2a;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">🚛</div>
+          <div>
+            <div style="font-weight:700;font-size:1rem;">Warehouse / Ops</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">Drivers, leads, and on-site warehouse crew.</div>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:4px;">Pull sheets · Scan gear · Rolling stock · Gear reports</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-card" onclick="setRole('management')" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:border-color .2s;width:100%;max-width:380px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:46px;height:46px;border-radius:12px;background:#2a1a3a;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">⭐</div>
+          <div>
+            <div style="font-weight:700;font-size:1rem;">Management</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">Sales, owners, and operations leadership.</div>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:4px;">All shows · CRM · Crew · Financials · Full controls</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="login-demo-note">Demo mode — tap any role to explore</div>
+    </div>
+
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+  <div class="header">
+    <h1><span>Show</span>runr ⚡</h1>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+      <span id="roleBadge" style="font-size:.65rem;padding:3px 8px;border-radius:10px;font-weight:700;"></span>
+      <button onclick="openTzModal()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:4px 10px;color:var(--muted);font-size:.72rem;cursor:pointer;" id="tzBtn">🌍 MST</button>
+      <button onclick="logout()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:4px 8px;color:var(--muted);font-size:.72rem;cursor:pointer;">⏏</button>
+    </div>
+  </div>
+
+  <!-- JOBS TAB -->
+  <div class="content tab active" id="tab-jobs">
+    <div class="section-title">Active & Upcoming</div>
+    <div id="jobsList"></div>
+  </div>
+
+  <!-- PULL SHEET TAB -->
+  <div class="content tab" id="tab-pull">
+    <div class="job-selector" id="pullJobSelector"></div>
+    <div id="pullProgress"></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;" id="pullActions"></div>
+    <div id="pullSheet"></div>
+  </div>
+
+  <!-- CREW TAB -->
+  <div class="content tab" id="tab-crew">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="assignCrew()">+ Assign Crew</button>
+      <button class="btn btn-outline btn-sm" onclick="openOnboarding()">👤 Onboard New Crew</button>
+      <button class="btn btn-outline btn-sm" onclick="toggleCrewRoster()">📋 Full Roster</button>
+    </div>
+    <div id="crewRoster" style="display:none;margin-bottom:16px;"></div>
+    <div class="job-selector" id="crewJobSelector"></div>
+    <div id="crewList"></div>
+  </div>
+
+  <!-- TIMELINE TAB -->
+  <div class="content tab" id="tab-timeline">
+    <div class="job-selector" id="tlJobSelector"></div>
+    <div id="tlProgress" style="margin-bottom:16px;"></div>
+    <div class="timeline" id="timelineList"></div>
+  </div>
+
+  <!-- SALES TAB -->
+  <div class="content tab" id="tab-sales">
+    <div class="section-title">Sales Team</div>
+    <div id="salesTeam"></div>
+    <div class="section-title" style="margin-top:20px">📬 Job Communications</div>
+    <div class="job-selector" id="salesJobSelector"></div>
+    <div id="salesComms"></div>
+  </div>
+
+  <!-- WAREHOUSE TAB -->
+  <div class="content tab" id="tab-warehouse">
+    <div class="stats-row" id="whStats"></div>
+    <div class="job-selector" id="whJobSelector"></div>
+    <div id="warehouseContent"></div>
+  </div>
+
+  <!-- INVENTORY TAB -->
+  <div class="content tab" id="tab-inventory">
+    <div class="stats-row" id="invStats"></div>
+    <input class="search" type="search" placeholder="🔍 Search equipment..." oninput="filterInventory(this.value)">
+    <div id="inventoryList"></div>
+  </div>
+
+  <!-- CRM TAB (management only) -->
+  <div class="content tab" id="tab-crm">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="openNewClient()">+ New Client</button>
+    </div>
+    <div class="stats-row" id="crmStats"></div>
+    <input class="search" type="search" placeholder="🔍 Search clients..." oninput="filterClients(this.value)" style="margin-top:8px;">
+    <div id="clientList"></div>
+  </div>
+
+  <!-- MY SHOW TAB (crew only) -->
+  <div class="content tab" id="tab-myshow">
+    <div id="myShowContent"></div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (rendered dynamically per role) -->
+<nav class="nav" id="mainNav"></nav>
+
+<!-- FAB -->
+<button class="fab" onclick="openNewJob()" id="fab" title="New Job">+</button>
+
+<!-- NEW JOB MODAL -->
+<div class="modal-overlay hidden" id="newJobModal">
+  <div class="modal">
+    <h2>⚡ New Job</h2>
+    <div class="form-group">
+      <label>Event Type</label>
+      <select id="fType">
+        <option value="Wedding">💒 Wedding</option>
+        <option value="Corporate">🏢 Corporate</option>
+        <option value="Festival">🎪 Festival</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Client Name</label>
+      <input type="text" id="fClient" placeholder="e.g. LIV Entertainment">
+    </div>
+    <div class="form-group">
+      <label>Venue</label>
+      <input type="text" id="fVenue" placeholder="e.g. Scottsdale Marriott">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Event Date</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="form-group">
+        <label>Load-in Time</label>
+        <input type="time" id="fLoadIn" value="08:00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Venue Timezone</label>
+      <select id="fTz"></select>
+    </div>
+    <div class="form-group">
+      <label>Budget</label>
+      <input type="number" id="fBudget" placeholder="8500">
+    </div>
+    <div class="form-group">
+      <label>Include Band / Performers?</label>
+      <select id="fBand">
+        <option value="0">No — Tech crew only</option>
+        <option value="1">Yes — Add band to crew assignment</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-primary" style="flex:1" onclick="createJob()">Create Job + Build Pull Sheet</button>
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOB EDIT MODAL -->
+<div class="modal-overlay hidden" id="editJobModal">
+  <div class="modal">
+    <h2>✏️ Edit Job</h2>
+    <div id="editJobContent"></div>
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button class="btn btn-primary" style="flex:1" onclick="saveJobEdit()">Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMS MODAL -->
+<div class="modal-overlay hidden" id="commsModal">
+  <div class="modal">
+    <h2>📬 Message On-Site Lead</h2>
+    <div id="commsThread" style="max-height:300px;overflow-y:auto;margin-bottom:12px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="commsInput" class="search" style="margin:0;flex:1" placeholder="Type a message...">
+      <button class="btn btn-primary" onclick="sendCommsMsg()">Send</button>
+    </div>
+    <button class="btn btn-outline btn-sm" style="margin-top:10px;width:100%" onclick="closeCommsModal()">Close</button>
+  </div>
+</div>
+
+<!-- GEAR REPORT MODAL -->
+<div class="modal-overlay hidden" id="gearReportModal">
+  <div class="modal">
+    <h2>🔧 Gear Report</h2>
+    <div class="form-group">
+      <label>Report Type</label>
+      <select id="rType">
+        <option value="missing">❌ Missing Item</option>
+        <option value="damaged">⚠️ Damaged Item</option>
+        <option value="cleaned">✅ Cleaned & Stored</option>
+        <option value="note">📝 General Note</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Item / Description</label>
+      <input type="text" id="rItem" placeholder="e.g. Moving Head Fixture #3">
+    </div>
+    <div class="form-group">
+      <label>Details</label>
+      <input type="text" id="rDetail" placeholder="e.g. Found cracked yoke, needs repair before next show">
+    </div>
+    <div class="form-group">
+      <label>Reported By</label>
+      <select id="rReporter">
+        <option>Marcus Tatum</option>
+        <option>Bobby Reeves</option>
+        <option>Sam Ochoa</option>
+        <option>Tina Marsh</option>
+        <option>Drew Cannon</option>
+        <option>Isaiah Ford</option>
+        <option>Rosa Mendez</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <button class="btn btn-primary" style="flex:1" onclick="submitGearReport()">Submit Report</button>
+      <button class="btn btn-outline" onclick="closeGearReport()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING MODAL -->
+<div class="modal-overlay hidden" id="onboardingModal">
+  <div class="modal" style="max-height:92vh;overflow-y:auto;">
+    <h2>👤 Onboard New Crew Member</h2>
+
+    <!-- PROGRESS STEPS -->
+    <div style="display:flex;gap:0;margin-bottom:20px;overflow:hidden;border-radius:8px;border:1px solid var(--border);">
+      <div class="ob-step active" id="obStep1" style="flex:1;padding:8px 4px;text-align:center;font-size:.68rem;font-weight:700;background:#1a2a3a;color:var(--blue);">1 · Info</div>
+      <div class="ob-step" id="obStep2" style="flex:1;padding:8px 4px;text-align:center;font-size:.68rem;font-weight:700;background:var(--card);color:var(--muted);border-left:1px solid var(--border);">2 · Role</div>
+      <div class="ob-step" id="obStep3" style="flex:1;padding:8px 4px;text-align:center;font-size:.68rem;font-weight:700;background:var(--card);color:var(--muted);border-left:1px solid var(--border);">3 · Docs</div>
+      <div class="ob-step" id="obStep4" style="flex:1;padding:8px 4px;text-align:center;font-size:.68rem;font-weight:700;background:var(--card);color:var(--muted);border-left:1px solid var(--border);">4 · Confirm</div>
+    </div>
+
+    <!-- STEP 1: PERSONAL INFO -->
+    <div id="obPage1">
+      <div class="section-title">Personal Information</div>
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" id="obFirst" placeholder="First"></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="obLast" placeholder="Last"></div>
+      </div>
+      <div class="form-group"><label>Phone Number</label><input type="tel" id="obPhone" placeholder="+1 (555) 000-0000"></div>
+      <div class="form-group"><label>Email Address</label><input type="email" id="obEmail" placeholder="name@email.com"></div>
+      <div class="form-group"><label>Emergency Contact Name</label><input type="text" id="obECName" placeholder="Full name"></div>
+      <div class="form-group"><label>Emergency Contact Phone</label><input type="tel" id="obECPhone" placeholder="+1 (555) 000-0000"></div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input type="text" id="obCity" placeholder="City"></div>
+        <div class="form-group"><label>State / Country</label><input type="text" id="obState" placeholder="AZ"></div>
+      </div>
+      <div class="form-group">
+        <label>Timezone</label>
+        <select id="obTz"></select>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="obNext(2)">Next → Role & Department</button>
+    </div>
+
+    <!-- STEP 2: ROLE -->
+    <div id="obPage2" style="display:none;">
+      <div class="section-title">Role & Department</div>
+      <div class="form-group">
+        <label>Department</label>
+        <select id="obDept" onchange="updateObRoles()">
+          <option value="audio">🔊 Audio</option>
+          <option value="lighting">💡 Lighting</option>
+          <option value="warehouse">🚛 Warehouse</option>
+          <option value="management">⭐ Management</option>
+          <option value="band">🎵 Band / Performer</option>
+          <option value="sales">💼 Sales</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Rank / Level</label>
+        <select id="obRank" onchange="updateObRoles()">
+          <option value="assistant">Assistant</option>
+          <option value="lasst">Lighting Assistant</option>
+          <option value="lead">Lead</option>
+          <option value="engineer">Engineer</option>
+          <option value="warehouse">Warehouse</option>
+          <option value="wh_crew">Warehouse Crew</option>
+          <option value="management">Management</option>
+          <option value="band">Band / Performer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Specific Role / Title</label>
+        <select id="obRole"></select>
+      </div>
+      <div class="form-group">
+        <label>Years Experience</label>
+        <select id="obYears">
+          <option>Less than 1 year</option>
+          <option>1–2 years</option>
+          <option>3–5 years</option>
+          <option selected>5–10 years</option>
+          <option>10+ years</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Skills / Specialties (comma separated)</label>
+        <input type="text" id="obSkills" placeholder="e.g. Dante, L-Acoustics, MA3, Rigging cert">
+      </div>
+      <div class="form-group">
+        <label>Pay Type</label>
+        <select id="obPayType">
+          <option value="gig">Gig Rate (per show)</option>
+          <option value="day">Day Rate</option>
+          <option value="salary">Salary</option>
+        </select>
+      </div>
+      <div class="form-group" id="obPayRateGroup">
+        <label>Rate ($)</label>
+        <input type="number" id="obPayRate" placeholder="e.g. 125">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn btn-outline" style="flex:1" onclick="obNext(1)">← Back</button>
+        <button class="btn btn-primary" style="flex:2" onclick="obNext(3)">Next → Documents</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: DOCUMENTS & COMPLIANCE -->
+    <div id="obPage3" style="display:none;">
+      <div class="section-title">Documents & Compliance</div>
+      <div style="background:#13151f;border-radius:8px;padding:12px;margin-bottom:14px;font-size:.78rem;color:var(--muted);">
+        Check off completed items. Unchecked items will show as pending in the crew member's profile.
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:.75rem;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Identity & Work Auth</label>
+        ${['Government ID verified','W-9 / Tax form on file','Work authorization confirmed'].map((item,i)=>`
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)22;cursor:pointer;">
+          <input type="checkbox" class="ob-doc" data-doc="${item}" style="width:16px;height:16px;">
+          <span style="font-size:.85rem;">${item}</span>
+        </label>`).join('')}
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:.75rem;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Safety & Certifications</label>
+        ${['General safety orientation complete','Rigging safety cert (if applicable)','Forklift / Genie lift cert (if applicable)','PPE issued (hard hat, harness)','OSHA 10 on file (if applicable)'].map(item=>`
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)22;cursor:pointer;">
+          <input type="checkbox" class="ob-doc" data-doc="${item}" style="width:16px;height:16px;">
+          <span style="font-size:.85rem;">${item}</span>
+        </label>`).join('')}
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:.75rem;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Company Agreements</label>
+        ${['Code of conduct signed','NDA signed','Subcontractor agreement signed','Pay rate agreed & documented','Added to crew management system'].map(item=>`
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)22;cursor:pointer;">
+          <input type="checkbox" class="ob-doc" data-doc="${item}" style="width:16px;height:16px;">
+          <span style="font-size:.85rem;">${item}</span>
+        </label>`).join('')}
+      </div>
+
+      <div class="form-group">
+        <label>Onboarded By</label>
+        <select id="obBy">
+          ${SALES_DB.map(s=>`<option value="${s.name}">${s.name} — ${s.role}</option>`).join('')}
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="btn btn-outline" style="flex:1" onclick="obNext(2)">← Back</button>
+        <button class="btn btn-primary" style="flex:2" onclick="obNext(4)">Next → Review</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: CONFIRM -->
+    <div id="obPage4" style="display:none;">
+      <div class="section-title">Review & Confirm</div>
+      <div id="obSummary"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="btn btn-outline" style="flex:1" onclick="obNext(3)">← Back</button>
+        <button class="btn btn-primary" style="flex:2;background:var(--green);color:#000;" onclick="submitOnboarding()">✅ Add to Roster</button>
+      </div>
+    </div>
+
+    <button class="btn btn-outline btn-sm" style="width:100%;margin-top:14px;" onclick="closeOnboarding()">Cancel</button>
+  </div>
+</div>
+
+<!-- NEW CLIENT MODAL -->
+<div class="modal-overlay hidden" id="newClientModal">
+  <div class="modal" style="max-height:92vh;overflow-y:auto;">
+    <h2>🏢 New Client</h2>
+    <div class="form-group"><label>Company / Client Name</label><input type="text" id="cName" placeholder="e.g. LIV Entertainment Group"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Primary Contact</label><input type="text" id="cContact" placeholder="Full name"></div>
+      <div class="form-group"><label>Title</label><input type="text" id="cTitle" placeholder="e.g. Owner"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone</label><input type="tel" id="cPhone" placeholder="+1 (555) 000-0000"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="cEmail" placeholder="email@company.com"></div>
+    </div>
+    <div class="form-group"><label>Address</label><input type="text" id="cAddress" placeholder="Street address"></div>
+    <div class="form-row">
+      <div class="form-group"><label>City</label><input type="text" id="cCity" placeholder="City"></div>
+      <div class="form-group"><label>State</label><input type="text" id="cState" placeholder="AZ"></div>
+    </div>
+    <div class="form-group"><label>Client Type</label>
+      <select id="cType">
+        <option>AV Company</option><option>Event Production Agency</option><option>Corporate Client</option>
+        <option>Venue</option><option>Wedding Planner</option><option>Festival / Concert Promoter</option>
+        <option>Band / Artist Management</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Lead Source</label>
+      <select id="cSource">
+        <option>Warm Referral</option><option>Cold Outreach</option><option>Website Inquiry</option>
+        <option>Social Media</option><option>Industry Event</option><option>Repeat Client</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Assigned Sales Rep</label>
+      <select id="cRep">${SALES_DB.map(s=>`<option value="${s.name}">${s.name}</option>`).join('')}</select>
+    </div>
+    <div class="form-group"><label>Status</label>
+      <select id="cStatus">
+        <option value="prospect">Prospect</option><option value="active">Active Client</option>
+        <option value="proposal">Proposal Sent</option><option value="closed">Closed / Won</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Notes</label>
+      <input type="text" id="cNotes" placeholder="e.g. Met at LDI expo. Interested in full-season contract.">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <button class="btn btn-primary" style="flex:1" onclick="saveNewClient()">Add Client</button>
+      <button class="btn btn-outline" onclick="closeNewClient()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TIMEZONE SETTINGS MODAL -->
+<div class="modal-overlay hidden" id="tzModal">
+  <div class="modal">
+    <h2>🌍 Timezone Settings</h2>
+    <div class="form-group">
+      <label>Your Local Timezone (HQ)</label>
+      <select id="tzLocal"></select>
+    </div>
+    <div class="form-group" style="margin-top:4px;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="checkbox" id="tzShowLocal" style="width:16px;height:16px;" onchange="saveTzSettings()">
+        <span>Show all times in my local timezone</span>
+      </label>
+    </div>
+    <div style="background:#13151f;border-radius:8px;padding:12px;margin:12px 0;font-size:.8rem;color:var(--muted);">
+      When enabled, all load-in times, milestones, and scan timestamps display in your local time — even if the show is in a different timezone. Venue timezone is always shown alongside for reference.
+    </div>
+    <div id="tzWorldClock" style="margin-bottom:12px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" style="flex:1" onclick="saveTzSettings();closeTzModal()">Save</button>
+      <button class="btn btn-outline" onclick="closeTzModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ============ DATA ============
+const MILESTONES = [
+  'Load-in Starts','Equipment Check Complete','Rigging / Structure Setup',
+  'Audio Setup Complete','Lighting Setup Complete','Sound Check',
+  'Doors Open','Show Start','Show End','Strike Begins','Strike Complete / Load-out Done'
+];
+
+// Master inventory — stocked for 4 full shows minimum
+const MASTER_INVENTORY = [
+  // AUDIO
+  {cat:'audio',name:'Bass Speaker (Subwoofer)',qty:20},
+  {cat:'audio',name:'Top Speaker (Main)',qty:12},
+  {cat:'audio',name:'Outfill Speaker on Tripod Stand',qty:28},
+  {cat:'audio',name:'DJ Booth',qty:6},
+  {cat:'audio',name:'Turntable',qty:6},
+  {cat:'audio',name:'Wireless Microphone',qty:24},
+  {cat:'audio',name:'XLR Cable 15ft',qty:50},
+  {cat:'audio',name:'XLR Cable 25ft',qty:50},
+  {cat:'audio',name:'XLR Cable 50ft',qty:30},
+  {cat:'audio',name:'XLR Cable 100ft',qty:20},
+  {cat:'audio',name:'DI Box',qty:16},
+  {cat:'audio',name:'Monitor Speaker (Wedge)',qty:12},
+  // LIGHTING
+  {cat:'lighting',name:'Moving Head Fixture',qty:28},
+  {cat:'lighting',name:'Leko Spotlight',qty:40},
+  {cat:'lighting',name:'Uplight',qty:200},
+  {cat:'lighting',name:'Spotlight',qty:48},
+  {cat:'lighting',name:'DMX Cable 15ft',qty:80},
+  {cat:'lighting',name:'DMX Cable 25ft',qty:40},
+  {cat:'lighting',name:'DMX Controller',qty:8},
+  {cat:'lighting',name:'Follow Spot',qty:8},
+  // STRUCTURES & POWER
+  {cat:'power',name:'12ft Truss Stick with Base & Sandbag',qty:10},
+  {cat:'power',name:'10ft Steel Pipe with 50lb Base & Sandbag',qty:36},
+  {cat:'power',name:'Power Cable 20ft',qty:200},
+  {cat:'power',name:'Power Cable 50ft',qty:50},
+  {cat:'power',name:'Power Strip',qty:48},
+  {cat:'power',name:'Cube Tap',qty:80},
+  {cat:'power',name:'Bag of Zip Ties',qty:12},
+  {cat:'power',name:'Roll Black Gaff Tape',qty:8},
+  {cat:'power',name:'Roll White Gaff Tape',qty:8},
+  {cat:'power',name:'Distro Box (200A)',qty:8},
+  // LADDERS
+  {cat:'tools',name:'12ft Ladder',qty:4},
+  {cat:'tools',name:'10ft Ladder',qty:4},
+  {cat:'tools',name:'8ft Ladder',qty:2},
+  {cat:'tools',name:'6ft Ladder',qty:6},
+  {cat:'tools',name:'Genie Lift / Boom',qty:2},
+  {cat:'tools',name:'Cable Ramp',qty:10},
+  {cat:'tools',name:'Road Case (Large)',qty:12},
+  {cat:'tools',name:'Road Case (Small)',qty:20},
+];
+
+// Wedding show pull template (per show)
+const WEDDING_TEMPLATE = [
+  {cat:'audio',name:'Bass Speaker (Subwoofer)',qty:4},
+  {cat:'audio',name:'Top Speaker (Main)',qty:2},
+  {cat:'audio',name:'Outfill Speaker on Tripod Stand',qty:6},
+  {cat:'audio',name:'DJ Booth',qty:1},
+  {cat:'audio',name:'Turntable',qty:1},
+  {cat:'audio',name:'Wireless Microphone',qty:4},
+  {cat:'audio',name:'XLR Cable 15ft',qty:10},
+  {cat:'audio',name:'XLR Cable 25ft',qty:10},
+  {cat:'audio',name:'XLR Cable 50ft',qty:6},
+  {cat:'audio',name:'XLR Cable 100ft',qty:4},
+  {cat:'lighting',name:'Moving Head Fixture',qty:6},
+  {cat:'lighting',name:'Leko Spotlight',qty:8},
+  {cat:'lighting',name:'Uplight',qty:40},
+  {cat:'lighting',name:'Spotlight',qty:10},
+  {cat:'lighting',name:'DMX Cable 15ft',qty:20},
+  {cat:'lighting',name:'DMX Cable 25ft',qty:10},
+  {cat:'power',name:'12ft Truss Stick with Base & Sandbag',qty:2},
+  {cat:'power',name:'10ft Steel Pipe with 50lb Base & Sandbag',qty:8},
+  {cat:'power',name:'Power Cable 20ft',qty:50},
+  {cat:'power',name:'Power Cable 50ft',qty:10},
+  {cat:'power',name:'Power Strip',qty:10},
+  {cat:'power',name:'Cube Tap',qty:20},
+  {cat:'power',name:'Bag of Zip Ties',qty:2},
+  {cat:'power',name:'Roll Black Gaff Tape',qty:1},
+  {cat:'power',name:'Roll White Gaff Tape',qty:1},
+  {cat:'tools',name:'12ft Ladder',qty:1},
+  {cat:'tools',name:'10ft Ladder',qty:1},
+  {cat:'tools',name:'6ft Ladder',qty:2},
+];
+
+// PAY STRUCTURE
+// setup: load-in/setup fee | strike: strike/load-out fee | standby: show standby fee (engineers/band only, no strike)
+// warehouse: flat day rate
+const PAY = {
+  management: {setup:250, strike:150, standby:0,   warehouse:0,   type:'setup+strike'},
+  lead:        {setup:200, strike:125, standby:150, warehouse:0,   type:'setup+standby'},  // audio/lighting leads get standby, no strike
+  warehouse:   {setup:0,   strike:0,   standby:0,   warehouse:200, type:'day-rate'},
+  assistant:   {setup:125, strike:75,  standby:0,   warehouse:0,   type:'setup+strike'},
+  lasst:       {setup:125, strike:75,  standby:0,   warehouse:0,   type:'setup+strike'},
+  wh_crew:     {setup:0,   strike:0,   standby:0,   warehouse:150, type:'day-rate'},
+  engineer:    {setup:200, strike:0,   standby:175, warehouse:0,   type:'setup+standby'},  // engineers: setup + standby, NO strike
+  band:        {setup:150, strike:0,   standby:200, warehouse:0,   type:'setup+standby'},  // band: setup + standby, NO strike
+};
+
+function crewPay(c, hasStrike=true){
+  const p=PAY[c.rank]||PAY.assistant;
+  if(p.type==='day-rate') return {total:p.warehouse, breakdown:`Day Rate: $${p.warehouse}`};
+  if(p.type==='setup+standby') return {total:p.setup+p.standby, breakdown:`Setup: $${p.setup} + Standby: $${p.standby}`};
+  const total=p.setup+(hasStrike?p.strike:0)+(p.standby||0);
+  return {total, breakdown:`Setup: $${p.setup}${hasStrike&&p.strike?` + Strike: $${p.strike}`:''}${p.standby?` + Standby: $${p.standby}`:''}`};
+}
+
+const CREW_DB = [
+  // MANAGEMENT (5)
+  {id:'c01',name:'Diana Reyes',    rank:'management',dept:'management',role:'Production Manager',      avatar:'DR',color:'#2a1a3a'},
+  {id:'c02',name:'Marcus Webb',    rank:'management',dept:'management',role:'Show Director',           avatar:'MW',color:'#2a1a3a'},
+  {id:'c03',name:'Simone Frost',   rank:'management',dept:'management',role:'Operations Manager',      avatar:'SF',color:'#2a1a3a'},
+  {id:'c04',name:'Jordan Banks',   rank:'management',dept:'management',role:'Project Manager',         avatar:'JB',color:'#2a1a3a'},
+  {id:'c05',name:'Carmen Vega',    rank:'management',dept:'management',role:'Event Coordinator',       avatar:'CV',color:'#2a1a3a'},
+  // AUDIO LEADS (5)
+  {id:'c06',name:'Jess Morales',   rank:'lead',dept:'audio',   role:'A1 Audio Lead',         avatar:'JM',color:'#1a2a3a'},
+  {id:'c07',name:'Travis Kim',     rank:'lead',dept:'audio',   role:'A2 Audio Lead',         avatar:'TK',color:'#1a2a3a'},
+  {id:'c11',name:'Priya Kapoor',   rank:'lead',dept:'audio',   role:'RF / Wireless Lead',    avatar:'PK',color:'#1a2a3a'},
+  {id:'c13',name:'Nina Torres',    rank:'lead',dept:'audio',   role:'Playback Lead',         avatar:'NT',color:'#1a2a3a'},
+  {id:'c15',name:'Lexi Grant',     rank:'lead',dept:'audio',   role:'FOH Lead',              avatar:'LG',color:'#1a2a3a'},
+  // LIGHTING LEADS (5)
+  {id:'c08',name:'Aaliyah Stone',  rank:'lead',dept:'lighting',role:'Lighting Director',     avatar:'AS',color:'#1a1a3a'},
+  {id:'c09',name:'Carlos Ruiz',    rank:'lead',dept:'lighting',role:'Lighting Lead',         avatar:'CR',color:'#1a1a3a'},
+  {id:'c10',name:'Devon Shaw',     rank:'lead',dept:'lighting',role:'Lighting Lead',         avatar:'DS',color:'#1a1a3a'},
+  {id:'c12',name:'Omar Diaz',      rank:'lead',dept:'lighting',role:'Rigging Lead',          avatar:'OD',color:'#1a1a3a'},
+  {id:'c14',name:'Ryan Okafor',    rank:'lead',dept:'lighting',role:'Spot Op Lead',          avatar:'RO',color:'#1a1a3a'},
+  // AUDIO ENGINEERS (5) — setup+standby, no strike
+  {id:'e01',name:'Marco Bell',     rank:'engineer',dept:'audio',  role:'FOH Engineer',          avatar:'MB',color:'#1a2a2a'},
+  {id:'e02',name:'Sasha Lin',      rank:'engineer',dept:'audio',  role:'Monitor Engineer',      avatar:'SL',color:'#1a2a2a'},
+  {id:'e03',name:'Tony Graves',    rank:'engineer',dept:'audio',  role:'Systems Engineer',      avatar:'TG',color:'#1a2a2a'},
+  {id:'e04',name:'Remi Obi',       rank:'engineer',dept:'audio',  role:'A2 / RF Engineer',      avatar:'RO',color:'#1a2a2a'},
+  {id:'e05',name:'Nadia Voss',     rank:'engineer',dept:'audio',  role:'Broadcast Engineer',    avatar:'NV',color:'#1a2a2a'},
+  // WAREHOUSE (5)
+  {id:'c16',name:'Marcus Tatum',   rank:'warehouse',dept:'warehouse',role:'Warehouse Lead / Driver', avatar:'MT',color:'#1a3a2a'},
+  {id:'c17',name:'Bobby Reeves',   rank:'warehouse',dept:'warehouse',role:'Gear Tech / Driver',      avatar:'BR',color:'#1a3a2a'},
+  {id:'c18',name:'Sam Ochoa',      rank:'warehouse',dept:'warehouse',role:'Inventory Specialist',    avatar:'SO',color:'#1a3a2a'},
+  {id:'c19',name:'Tina Marsh',     rank:'warehouse',dept:'warehouse',role:'Warehouse Tech',          avatar:'TM',color:'#1a3a2a'},
+  {id:'c20',name:'Drew Cannon',    rank:'warehouse',dept:'warehouse',role:'Load / Unload Crew',      avatar:'DC',color:'#1a3a2a'},
+  // EXTRA WAREHOUSE CREW (5)
+  {id:'w01',name:'Isaiah Ford',    rank:'wh_crew',dept:'warehouse',role:'Truck Driver',             avatar:'IF',color:'#1a3a2a'},
+  {id:'w02',name:'Kenji Patel',    rank:'wh_crew',dept:'warehouse',role:'Gear Runner',              avatar:'KP',color:'#1a3a2a'},
+  {id:'w03',name:'Rosa Mendez',    rank:'wh_crew',dept:'warehouse',role:'Load Crew',                avatar:'RM',color:'#1a3a2a'},
+  {id:'w04',name:'Eli Stone',      rank:'wh_crew',dept:'warehouse',role:'Load Crew',                avatar:'ES',color:'#1a3a2a'},
+  {id:'w05',name:'Maya Brooks',    rank:'wh_crew',dept:'warehouse',role:'Gear Check Technician',    avatar:'MB',color:'#1a3a2a'},
+  // AUDIO ASSISTANTS (5)
+  {id:'c21',name:'Zara Ellis',     rank:'assistant',dept:'audio',  role:'Audio Assistant',  avatar:'ZE',color:'#13151f'},
+  {id:'c22',name:'Felix Drown',    rank:'assistant',dept:'audio',  role:'Audio Assistant',  avatar:'FD',color:'#13151f'},
+  {id:'c23',name:'Miles Foster',   rank:'assistant',dept:'audio',  role:'Cable Tech',       avatar:'MF',color:'#13151f'},
+  {id:'c24',name:'Dante Cruz',     rank:'assistant',dept:'audio',  role:'Stage Hand',       avatar:'DC',color:'#13151f'},
+  {id:'c25',name:'Cole Wright',    rank:'assistant',dept:'audio',  role:'Stage Hand',       avatar:'CW',color:'#13151f'},
+  // EXTRA CREW - RANDOM (10)
+  {id:'x01',name:'Jasper Moon',    rank:'assistant',dept:'audio',  role:'A/V Technician',   avatar:'JM',color:'#13151f'},
+  {id:'x02',name:'Layla Pierce',   rank:'assistant',dept:'audio',  role:'Stage Hand',       avatar:'LP',color:'#13151f'},
+  {id:'x03',name:'Finn Casey',     rank:'assistant',dept:'audio',  role:'Cable Tech',       avatar:'FC',color:'#13151f'},
+  {id:'x04',name:'Aria West',      rank:'lasst',    dept:'lighting',role:'Uplight Tech',    avatar:'AW',color:'#13151f'},
+  {id:'x05',name:'Beau Nash',      rank:'lasst',    dept:'lighting',role:'Rig Assistant',   avatar:'BN',color:'#13151f'},
+  {id:'x06',name:'Zoe Holt',       rank:'lasst',    dept:'lighting',role:'Spot Operator',   avatar:'ZH',color:'#13151f'},
+  {id:'x07',name:'Eli Marsh',      rank:'assistant',dept:'audio',  role:'Stage Hand',       avatar:'EM',color:'#13151f'},
+  {id:'x08',name:'Cleo Vance',     rank:'lasst',    dept:'lighting',role:'Lighting Assistant',avatar:'CV',color:'#13151f'},
+  {id:'x09',name:'Reid Foster',    rank:'assistant',dept:'audio',  role:'A/V Assistant',    avatar:'RF',color:'#13151f'},
+  {id:'x10',name:'Sage Dunn',      rank:'lasst',    dept:'lighting',role:'Lighting Assistant',avatar:'SD',color:'#13151f'},
+  // LIGHTING ASSISTANTS (5)
+  {id:'c26',name:'Noah Chen',      rank:'lasst',dept:'lighting',role:'Lighting Assistant',  avatar:'NC',color:'#13151f'},
+  {id:'c27',name:'Amara Jolie',    rank:'lasst',dept:'lighting',role:'Lighting Assistant',  avatar:'AJ',color:'#13151f'},
+  {id:'c28',name:'Keiko Park',     rank:'lasst',dept:'lighting',role:'Staging Assistant',   avatar:'KP',color:'#13151f'},
+  {id:'c29',name:'Isla Reed',      rank:'lasst',dept:'lighting',role:'Uplight Tech',        avatar:'IR',color:'#13151f'},
+  {id:'c30',name:'Yara Singh',     rank:'lasst',dept:'lighting',role:'Lighting Assistant',  avatar:'YS',color:'#13151f'},
+  // BAND / PERFORMERS (15) — setup+standby, no strike
+  {id:'b01',name:'DJ Kash',        rank:'band',dept:'band',role:'DJ',                avatar:'DK',color:'#2a1a2a'},
+  {id:'b02',name:'Raven Skye',     rank:'band',dept:'band',role:'Vocalist',          avatar:'RS',color:'#2a1a2a'},
+  {id:'b03',name:'Lex Monroe',     rank:'band',dept:'band',role:'Vocalist',          avatar:'LM',color:'#2a1a2a'},
+  {id:'b04',name:'Tomas Rey',      rank:'band',dept:'band',role:'Saxophonist',       avatar:'TR',color:'#2a1a2a'},
+  {id:'b05',name:'Chloe Vane',     rank:'band',dept:'band',role:'Saxophonist',       avatar:'CV',color:'#2a1a2a'},
+  {id:'b06',name:'Andre King',     rank:'band',dept:'band',role:'Drummer',           avatar:'AK',color:'#2a1a2a'},
+  {id:'b07',name:'Nia Cole',       rank:'band',dept:'band',role:'Percussionist',     avatar:'NC',color:'#2a1a2a'},
+  {id:'b08',name:'Luca Ferre',     rank:'band',dept:'band',role:'Violinist',         avatar:'LF',color:'#2a1a2a'},
+  {id:'b09',name:'Mia Song',       rank:'band',dept:'band',role:'Violinist',         avatar:'MS',color:'#2a1a2a'},
+  {id:'b10',name:'Orion Blake',    rank:'band',dept:'band',role:'Flutist',           avatar:'OB',color:'#2a1a2a'},
+  {id:'b11',name:'Vera Cruz',      rank:'band',dept:'band',role:'Cellist',           avatar:'VC',color:'#2a1a2a'},
+  {id:'b12',name:'Kai Tanaka',     rank:'band',dept:'band',role:'Guitarist',         avatar:'KT',color:'#2a1a2a'},
+  {id:'b13',name:'Jade Noel',      rank:'band',dept:'band',role:'Bassist',           avatar:'JN',color:'#2a1a2a'},
+  {id:'b14',name:'River Stone',    rank:'band',dept:'band',role:'Keyboardist',       avatar:'RS',color:'#2a1a2a'},
+  {id:'b15',name:'Zion Wells',     rank:'band',dept:'band',role:'MC / Host',         avatar:'ZW',color:'#2a1a2a'},
+];
+
+const SALES_DB = [
+  {id:'s1',name:'Emmanuel Rivera', role:'Sales Director',     avatar:'ER', deals:12, revenue:94200},
+  {id:'s2',name:'Tasha Monroe',    role:'Senior Account Exec',avatar:'TM', deals:9,  revenue:71500},
+  {id:'s3',name:'Derek Osei',      role:'Account Executive',  avatar:'DO', deals:7,  revenue:52000},
+  {id:'s4',name:'Brianna Cole',    role:'Account Executive',  avatar:'BC', deals:5,  revenue:38500},
+  {id:'s5',name:'Leo Huang',       role:'Sales Coordinator',  avatar:'LH', deals:4,  revenue:28000},
+];
+
+const STATUS_CYCLE = ['warehouse','pulled','on-site','returned'];
+const STATUS_LABELS = {warehouse:'Warehouse',pulled:'Pulled','on-site':'On-Site',returned:'Returned','rolling-in':'Rolling In'};
+const STATUS_BADGE  = {warehouse:'badge-gray',pulled:'badge-yellow','on-site':'badge-blue',returned:'badge-green','rolling-in':'badge-purple'};
+const CREW_STATUS_CYCLE = ['assigned','confirmed','on-site'];
+const CREW_STATUS_BADGE = {assigned:'badge-gray',confirmed:'badge-blue','on-site':'badge-green'};
+
+// ============ STATE ============
+let state = loadState();
+
+// Random client/venue name pools (neutral — no favorites)
+const CLIENTS=['Pinnacle Events','Apex Productions','Summit AV','Horizon Event Group','Crest Productions','Meridian Events','Altitude AV','Keystone Entertainment','Vanguard Productions','Landmark Events'];
+const VENUES_WEDDING=['The Phoenician Grand Ballroom','Desert Ridge Resort','Scottsdale Safari Park','Paradise Valley Estate','Old Town Hall, Chandler'];
+const VENUES_CORP=['Phoenix Convention Center','Tempe Civic Center','Mesa Arts Center','Scottsdale Conference Center','Camelback Executive Center'];
+const VENUES_STADIUM=['State Farm Stadium, Glendale','Footprint Center, Phoenix','Chase Field, Phoenix','Desert Diamond Arena','Salt River Fields'];
+const VENUES_FESTIVAL=['Margaret T. Hance Park','Steele Indian School Park','Riverview Park, Mesa','Veterans Oasis Park','Papago Park Amphitheater'];
+function rnd(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function rndCrew(inclBand=false){
+  const pick=(a,n)=>[...a].sort(()=>Math.random()-.5).slice(0,n);
+  const c=[
+    ...pick(CREW_DB.filter(x=>x.rank==='management'),1),
+    ...pick(CREW_DB.filter(x=>x.rank==='lead'&&x.dept==='audio'),1),
+    ...pick(CREW_DB.filter(x=>x.rank==='lead'&&x.dept==='lighting'),1),
+    ...pick(CREW_DB.filter(x=>x.rank==='engineer'),1),
+    ...pick(CREW_DB.filter(x=>x.rank==='warehouse'),1),
+    ...pick(CREW_DB.filter(x=>x.rank==='wh_crew'),1),
+    ...pick(CREW_DB.filter(x=>x.rank==='assistant'),3),
+    ...pick(CREW_DB.filter(x=>x.rank==='lasst'),3),
+  ];
+  if(inclBand) c.push(...pick(CREW_DB.filter(x=>x.rank==='band'),4));
+  const cs={};c.forEach(x=>cs[x.id]='assigned');
+  return {crew:c.map(x=>x.id),crewStatus:cs};
+}
+
+// Stadium template — bigger show
+const STADIUM_TEMPLATE=[
+  {cat:'audio',name:'Bass Speaker (Subwoofer)',qty:16},{cat:'audio',name:'Top Speaker (Main)',qty:8},
+  {cat:'audio',name:'Outfill Speaker on Tripod Stand',qty:12},{cat:'audio',name:'Wireless Microphone',qty:12},
+  {cat:'audio',name:'Monitor Speaker (Wedge)',qty:8},{cat:'audio',name:'DI Box',qty:12},
+  {cat:'audio',name:'XLR Cable 25ft',qty:20},{cat:'audio',name:'XLR Cable 50ft',qty:16},{cat:'audio',name:'XLR Cable 100ft',qty:12},
+  {cat:'lighting',name:'Moving Head Fixture',qty:20},{cat:'lighting',name:'Leko Spotlight',qty:16},
+  {cat:'lighting',name:'Follow Spot',qty:6},{cat:'lighting',name:'Uplight',qty:80},{cat:'lighting',name:'DMX Controller',qty:4},
+  {cat:'lighting',name:'DMX Cable 15ft',qty:40},{cat:'lighting',name:'DMX Cable 25ft',qty:20},
+  {cat:'power',name:'12ft Truss Stick with Base & Sandbag',qty:6},{cat:'power',name:'10ft Steel Pipe with 50lb Base & Sandbag',qty:20},
+  {cat:'power',name:'Distro Box (200A)',qty:4},{cat:'power',name:'Power Cable 20ft',qty:80},{cat:'power',name:'Power Cable 50ft',qty:30},
+  {cat:'power',name:'Power Strip',qty:20},{cat:'power',name:'Cube Tap',qty:40},{cat:'power',name:'Bag of Zip Ties',qty:6},
+  {cat:'power',name:'Roll Black Gaff Tape',qty:4},{cat:'power',name:'Roll White Gaff Tape',qty:4},
+  {cat:'tools',name:'12ft Ladder',qty:4},{cat:'tools',name:'10ft Ladder',qty:4},{cat:'tools',name:'Genie Lift / Boom',qty:2},
+  {cat:'tools',name:'Road Case (Large)',qty:8},{cat:'tools',name:'Road Case (Small)',qty:12},
+];
+
+function defaultState(){
+  // Week of April 10–13, 2026
+  // Friday: Festival + Corporate (same day — rolling stock opportunity!)
+  // Saturday: Wedding x2
+  // Sunday: Corporate
+  const wkFri='2026-04-10', wkSat='2026-04-12', wkSun='2026-04-13';
+
+  const j1c=rndCrew(true);   // Festival Friday
+  const j2c=rndCrew(false);  // Corporate Friday (same day — gets rolling gear from j1)
+  const j3c=rndCrew(true);   // Wedding Saturday A
+  const j4c=rndCrew(true);   // Wedding Saturday B
+  const j5c=rndCrew(false);  // Corporate Saturday (gets rolling gear from j3/j4)
+  const j6c=rndCrew(false);  // Corporate Sunday
+
+  const jobs=[
+    {
+      id:'j1',type:'Festival',client:rnd(CLIENTS),venue:rnd(VENUES_FESTIVAL),
+      date:wkFri,loadIn:'12:00',budget:32000,status:'active',
+      pullSheet:STADIUM_TEMPLATE.map(e=>({...e,status:'warehouse'})),
+      ...j1c,
+      milestones:MILESTONES.map((m,i)=>({name:m,done:i<3,time:i<3?['11:45 AM','12:30 PM','2:15 PM'][i]:null})),
+      messages:[
+        {from:'sales',sender:'Emmanuel Rivera',text:'Big one today — full stadium rig. Confirm truck left warehouse.',time:'10:15 AM'},
+        {from:'lead',sender:'Jess Morales',text:'Truck departed 10:05. All gear loaded and scanned. ETA venue 11:30.',time:'10:22 AM'},
+        {from:'sales',sender:'Emmanuel Rivera',text:'Perfect. After strike, gear rolls DIRECT to Corporate show at Tempe Civic — DO NOT return to warehouse.',time:'10:25 AM'},
+        {from:'lead',sender:'Jess Morales',text:'Copy. Rolling stock flagged. Will coordinate with Marcus on handoff.',time:'10:28 AM'},
+      ],
+      // ROLLING STOCK: after strike, gear routes to j2
+      rollingTo:'j2',
+    },
+    {
+      id:'j2',type:'Corporate',client:rnd(CLIENTS),venue:rnd(VENUES_CORP),
+      date:wkFri,loadIn:'20:00',budget:14000,status:'upcoming',
+      pullSheet:WEDDING_TEMPLATE.map(e=>({...e,status:'warehouse'})),
+      ...j2c,
+      milestones:MILESTONES.map(m=>({name:m,done:false,time:null})),
+      messages:[],
+      // ROLLING STOCK: receiving gear from j1
+      rollingFrom:'j1',
+    },
+    {
+      id:'j3',type:'Wedding',client:rnd(CLIENTS),venue:rnd(VENUES_WEDDING),
+      date:wkSat,loadIn:'08:00',budget:9500,status:'upcoming',
+      pullSheet:WEDDING_TEMPLATE.map(e=>({...e,status:'warehouse'})),
+      ...j3c,
+      milestones:MILESTONES.map(m=>({name:m,done:false,time:null})),
+      messages:[],
+      rollingTo:'j5',
+    },
+    {
+      id:'j4',type:'Wedding',client:rnd(CLIENTS),venue:rnd(VENUES_WEDDING),
+      date:wkSat,loadIn:'09:00',budget:8800,status:'upcoming',
+      pullSheet:WEDDING_TEMPLATE.map(e=>({...e,status:'warehouse'})),
+      ...j4c,
+      milestones:MILESTONES.map(m=>({name:m,done:false,time:null})),
+      messages:[],
+    },
+    {
+      id:'j5',type:'Corporate',client:rnd(CLIENTS),venue:rnd(VENUES_CORP),
+      date:wkSat,loadIn:'18:00',budget:11000,status:'upcoming',
+      pullSheet:WEDDING_TEMPLATE.map(e=>({...e,status:'warehouse'})),
+      ...j5c,
+      milestones:MILESTONES.map(m=>({name:m,done:false,time:null})),
+      messages:[],
+      rollingFrom:'j3',
+    },
+    {
+      id:'j6',type:'Corporate',client:rnd(CLIENTS),venue:rnd(VENUES_CORP),
+      date:wkSun,loadIn:'09:00',budget:13500,status:'upcoming',
+      pullSheet:WEDDING_TEMPLATE.map(e=>({...e,status:'warehouse'})),
+      ...j6c,
+      milestones:MILESTONES.map(m=>({name:m,done:false,time:null})),
+      messages:[],
+    },
+  ];
+  return {jobs, selectedJob:'j1'};
+}
+
+function loadState(){
+  try{const s=localStorage.getItem('showrunr_state');return s?JSON.parse(s):defaultState();}
+  catch{return defaultState();}
+}
+function saveState(){localStorage.setItem('showrunr_state',JSON.stringify(state));}
+function getJob(id){return state.jobs.find(j=>j.id===(id||state.selectedJob));}
+function selectJob(id){state.selectedJob=id;saveState();renderAll();}
+
+// ============ TOAST ============
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// ============ TAB SWITCHING ============
+let currentTab='jobs';
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  btn.classList.add('active');
+  currentTab=tab;
+  const fab=document.getElementById('fab');
+  fab.style.display=(tab==='jobs'&&currentRole!=='crew')?'flex':'none';
+  renderTab(tab);
+}
+function renderTab(tab){
+  if(tab==='jobs') renderJobs();
+  else if(tab==='pull') renderPull();
+  else if(tab==='crew') renderCrew();
+  else if(tab==='timeline') renderTimeline();
+  else if(tab==='sales') renderSales();
+  else if(tab==='warehouse') renderWarehouse();
+  else if(tab==='inventory') renderInventory();
+  else if(tab==='crm') renderCRM();
+  else if(tab==='myshow') renderMyShow();
+}
+function renderAll(){renderTab(currentTab);}
+
+// ============ JOBS ============
+function renderJobs(){
+  const el=document.getElementById('jobsList');
+  // Group by date
+  const byDate={};
+  state.jobs.forEach(j=>{
+    if(!byDate[j.date]) byDate[j.date]=[];
+    byDate[j.date].push(j);
+  });
+  const sortedDates=Object.keys(byDate).sort();
+  let html='';
+  sortedDates.forEach(date=>{
+    const jobs=byDate[date];
+    const d=new Date(date+'T12:00:00');
+    const dayLabel=d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+    const isToday=date===new Date().toISOString().split('T')[0];
+    const hasConflict=jobs.length>1;
+    html+=`<div style="display:flex;align-items:center;gap:8px;margin:16px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+      <span style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:${hasConflict?'var(--yellow)':'var(--muted)'};font-weight:${hasConflict?700:400}">
+        ${isToday?'TODAY — ':''} ${dayLabel}
+      </span>
+      ${hasConflict?`<span style="background:#2a2a1a;color:var(--yellow);font-size:.65rem;padding:2px 8px;border-radius:10px;font-weight:700;">⚡ ${jobs.length} shows — rolling stock day</span>`:''}
+    </div>`;
+    jobs.forEach(j=>html+=jobCard(j));
+  });
+  el.innerHTML=html||'<div class="empty-state"><div class="icon">📅</div><p>No jobs yet</p></div>';
+  const active=state.jobs.filter(j=>j.status!=='completed').length;
+  document.getElementById('headerSub').textContent=state.jobs.length+' Shows This Week';
+}
+function rollingBadge(j){
+  if(!j.rollingTo&&!j.rollingFrom) return '';
+  let html='<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">';
+  if(j.rollingTo){
+    const dest=state.jobs.find(x=>x.id===j.rollingTo);
+    html+=`<div style="background:#1a3a1a;border:1px solid var(--green)44;border-radius:8px;padding:4px 10px;font-size:.7rem;color:var(--green)">🔄 Rolling → ${dest?dest.client+' ('+dest.loadIn+')':'next show'}</div>`;
+  }
+  if(j.rollingFrom){
+    const src=state.jobs.find(x=>x.id===j.rollingFrom);
+    html+=`<div style="background:#1a2a3a;border:1px solid var(--blue)44;border-radius:8px;padding:4px 10px;font-size:.7rem;color:var(--blue)">📦 Receiving gear from ${src?src.client:'prior show'}</div>`;
+  }
+  html+='</div>';
+  return html;
+}
+
+function jobCard(j){
+  const icons={Wedding:'💒',Corporate:'🏢',Festival:'🎪'};
+  const statusBadge={active:'badge-blue',upcoming:'badge-purple',completed:'badge-green'};
+  const sel=state.selectedJob===j.id?' selected':'';
+  const d=new Date(j.date+'T12:00:00');
+  const dateStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  // Same-day alert
+  const sameDay=state.jobs.filter(x=>x.id!==j.id&&x.date===j.date);
+  const sameDayBadge=sameDay.length?`<span style="font-size:.65rem;background:#2a1a1a;color:var(--yellow);padding:2px 7px;border-radius:10px;margin-left:6px;">⚡ +${sameDay.length} same day</span>`:'';
+  return `<div class="card job-card${sel}" onclick="selectJob('${j.id}')">
+    <div class="job-card-header">
+      <div class="job-icon ${j.type.toLowerCase()}">${icons[j.type]||'🎯'}</div>
+      <div class="job-card-info">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;">
+          <h3>${j.client}${sameDayBadge}</h3>
+          <span class="badge ${statusBadge[j.status]||'badge-gray'}">${j.status}</span>
+        </div>
+        <div class="job-meta">📍 ${j.venue}</div>
+        <div class="job-meta">📅 ${dateStr} · ⏰ Load-in ${formatTime(j.loadIn,j.tz||'America/Phoenix',{date:j.date})}</div>
+        <div class="job-budget">$${j.budget.toLocaleString()}</div>
+      </div>
+    </div>
+    ${rollingBadge(j)}
+    ${j.pullSheet&&j.pullSheet.length?`<div style="margin-top:10px">${miniProgress(j)}</div>`:''}
+  </div>`;
+}
+function miniProgress(j){
+  const total=j.pullSheet.length;
+  const pulled=j.pullSheet.filter(e=>e.status!=='warehouse').length;
+  const pct=total?Math.round(pulled/total*100):0;
+  return `<div class="progress-label"><span>Pull Sheet</span><span>${pulled}/${total} items</span></div>
+  <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+}
+
+// ============ PULL SHEET ============
+function renderPull(){
+  renderJobSelector('pullJobSelector');
+  const j=getJob();
+  if(!j){document.getElementById('pullSheet').innerHTML='<div class="empty-state"><div class="icon">📋</div><p>Select a job to view pull sheet</p></div>';return;}
+  const total=j.pullSheet.length;
+  const pulled=j.pullSheet.filter(e=>e.status!=='warehouse').length;
+  const pct=total?Math.round(pulled/total*100):0;
+  // Dynamic action buttons
+  let actionBtns=`<button class="btn btn-primary btn-sm" onclick="scanAll()">⚡ Scan All</button>`;
+  actionBtns+=`<button class="btn btn-sm" style="background:#1a2a3a;color:var(--blue);border:1px solid var(--blue)44" onclick="autoGeneratePullSheet()">📋 Auto-Generate Pull Sheet</button>`;
+  if(j.rollingTo) actionBtns+=`<button class="btn btn-sm" style="background:#1a3a1a;color:var(--green);border:1px solid var(--green)44" onclick="scanAllRolling()">🔄 Strike + Roll All</button>`;
+  actionBtns+=`<button class="btn btn-outline btn-sm" onclick="resetPull()">↺ Reset</button>`;
+  document.getElementById('pullActions').innerHTML=actionBtns;
+
+  // Rolling readiness gate for receiving show
+  let readinessGate='';
+  if(j.rollingFrom){
+    checkRollingReadiness(j);
+    const rolledIn=j.pullSheet.filter(e=>e.status==='rolling-in').length;
+    const stillMissing=j.pullSheet.filter(e=>e.status==='warehouse');
+    const allReady=stillMissing.length===0;
+    readinessGate=`<div style="background:${allReady?'#1a3a1a':'#1a1a1a'};border:1px solid ${allReady?'var(--green)44':'var(--border)'};border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+      <div style="font-weight:700;font-size:.88rem;color:${allReady?'var(--green)':'var(--yellow)'}">
+        ${allReady?'✅ Show Ready — All Gear Confirmed':'⏳ Show NOT Ready — Awaiting Gear'}
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:4px;">${rolledIn} items confirmed rolling in · ${stillMissing.length} items still unaccounted</div>
+      ${stillMissing.length>0?`<div style="margin-top:8px;">${stillMissing.slice(0,5).map(e=>`<div style="font-size:.72rem;color:var(--red);padding:2px 0;">❌ ${e.name} ×${e.qty}</div>`).join('')}${stillMissing.length>5?`<div style="font-size:.7rem;color:var(--muted)">+ ${stillMissing.length-5} more...</div>`:''}</div>`:''}
+    </div>`;
+  }
+
+  // Rolling stock notice
+  let rollingNotice=readinessGate;
+  if(j.rollingFrom){
+    const src=state.jobs.find(x=>x.id===j.rollingFrom);
+    const ready=src&&src.rollingReady;
+    rollingNotice=`<div style="background:${ready?'#1a3a1a':'#1a2a1a'};border:1px solid ${ready?'var(--green)':'var(--yellow)'}44;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.8rem;">
+      <span style="font-weight:700;color:${ready?'var(--green)':'var(--yellow)'}">📦 ${ready?'Gear en route from':'Awaiting gear from'} ${src?src.client:'prior show'}</span><br>
+      <span style="color:var(--muted);">This show receives rolling stock from the prior show's strike. ${ready?'Gear is on the way — confirm receipt on-site.':'Gear not yet released from source show.'}</span>
+    </div>`;
+  }
+  if(j.rollingTo){
+    const dest=state.jobs.find(x=>x.id===j.rollingTo);
+    rollingNotice+=`<div style="background:#1a3a1a;border:1px solid var(--green)44;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.8rem;">
+      <span style="font-weight:700;color:var(--green)">🔄 After strike → Roll to ${dest?dest.client:'next show'}</span><br>
+      <span style="color:var(--muted);">Do NOT return gear to warehouse. Route directly to ${dest?dest.venue+' (Load-in: '+dest.loadIn+')':'next venue'}.</span>
+    </div>`;
+  }
+  document.getElementById('pullProgress').innerHTML=rollingNotice+`
+    <div class="progress-label"><span style="font-weight:700">${pulled} of ${total} items pulled</span><span style="color:var(--blue)">${pct}%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+  const cats={audio:'AUDIO',lighting:'LIGHTING',power:'STRUCTURES & POWER',tools:'LADDERS & TOOLS'};
+  let html='';
+  Object.keys(cats).forEach(cat=>{
+    const items=j.pullSheet.filter(e=>e.cat===cat);
+    if(!items.length)return;
+    html+=`<div class="cat-header">${cats[cat]} <span style="color:var(--muted);font-weight:400">(${items.length} items)</span></div>`;
+    items.forEach((e)=>{
+      const gi=j.pullSheet.indexOf(e);
+      const isRollingIn=e.status==='rolling-in';
+      const srcJob=e.rollingFrom?state.jobs.find(x=>x.id===e.rollingFrom):null;
+      html+=`<div class="eq-row" style="${isRollingIn?'background:#1a1a3a;border-radius:8px;padding:6px 4px;':''}">
+        <div class="eq-dot ${cat==='tools'?'power':cat}"></div>
+        <div style="flex:1;min-width:0;">
+          <span class="eq-name">${e.name}</span>
+          ${isRollingIn&&srcJob?`<div style="font-size:.65rem;color:var(--purple);margin-top:2px;">🔄 Rolled from ${srcJob.client}${e.scannedAt?' · '+e.scannedAt:''}</div>`:''}
+          ${e.scannedAt&&!isRollingIn?`<div style="font-size:.65rem;color:var(--muted);">Scanned ${e.scannedAt}</div>`:''}
+        </div>
+        <span class="eq-qty">×${e.qty}</span>
+        <span class="badge ${STATUS_BADGE[e.status]||'badge-gray'} btn-sm">${STATUS_LABELS[e.status]||e.status}</span>
+        ${isRollingIn?`<span style="font-size:.7rem;color:var(--purple)">✓</span>`:`<button class="btn btn-scan btn-sm" onclick="scanItem('${j.id}',${gi})">📷</button>`}
+        <button class="btn btn-sm" style="background:${e.loadInConfirmed?'#1a3a1a':'#13151f'};color:${e.loadInConfirmed?'var(--green)':'var(--muted)'};border:1px solid ${e.loadInConfirmed?'var(--green)44':'var(--border)'};font-size:.6rem;padding:3px 6px;" onclick="confirmGear('${j.id}',${gi},'loadIn')" title="Confirm Load In">${e.loadInConfirmed?'✅ In':'↓ In'}</button>
+        <button class="btn btn-sm" style="background:${e.loadOutConfirmed?'#3a1a1a':'#13151f'};color:${e.loadOutConfirmed?'var(--yellow)':'var(--muted)'};border:1px solid ${e.loadOutConfirmed?'var(--yellow)44':'var(--border)'};font-size:.6rem;padding:3px 6px;" onclick="confirmGear('${j.id}',${gi},'loadOut')" title="Confirm Load Out">${e.loadOutConfirmed?'✅ Out':'↑ Out'}</button>
+      </div>`;
+    });
+  });
+  document.getElementById('pullSheet').innerHTML=html||'<div class="empty-state"><div class="icon">📋</div><p>No pull sheet yet</p></div>';
+}
+// ── AUTO-GENERATE PULL SHEET ──
+function autoGeneratePullSheet(){
+  const j=getJob();
+  if(!j||!j.pullSheet||!j.pullSheet.length){toast('No pull sheet items found');return;}
+  let staged=0;
+  j.pullSheet.forEach(e=>{
+    if(e.status==='warehouse'){e.status='staged';staged++;}
+  });
+  saveState();
+  renderPull();
+  toast(`⚡ Pull sheet auto-generated — ${staged} items staged`);
+}
+
+// ── CREW GEAR CONFIRMATION (LOAD IN / LOAD OUT) ──
+function confirmGear(jobId,idx,type){
+  const j=getJob(jobId);
+  if(!j||!j.pullSheet[idx])return;
+  const e=j.pullSheet[idx];
+  if(type==='loadIn'){
+    e.loadInConfirmed=!e.loadInConfirmed;
+    toast(e.loadInConfirmed?`✅ Load-in confirmed: ${e.name}`:`↩ Load-in cleared: ${e.name}`);
+  } else {
+    e.loadOutConfirmed=!e.loadOutConfirmed;
+    toast(e.loadOutConfirmed?`✅ Load-out confirmed: ${e.name}`:`↩ Load-out cleared: ${e.name}`);
+  }
+  saveState();
+  renderPull();
+}
+
+// ── WAREHOUSE AUTO-FILL FROM JOB ──
+function autoFillWarehouse(){
+  const j=getJob();
+  if(!j||!j.pullSheet||!j.pullSheet.length){toast('No job selected or pull sheet empty');return;}
+  const statuses=['staged','loaded','returned'];
+  // Build or restore warehouse staging state
+  if(!j.whStaging) j.whStaging={};
+  let html=`<div class="card" style="margin-bottom:12px;">
+    <div style="font-weight:700;font-size:.9rem;margin-bottom:10px;">🚛 Warehouse Staging — ${j.client}</div>`;
+  const cats={audio:'AUDIO',lighting:'LIGHTING',power:'POWER',tools:'TOOLS'};
+  Object.keys(cats).forEach(cat=>{
+    const items=j.pullSheet.filter(e=>e.cat===cat);
+    if(!items.length)return;
+    html+=`<div style="font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:6px 0 4px;">${cats[cat]}</div>`;
+    items.forEach((e,i)=>{
+      const key=cat+'_'+i;
+      const s=j.whStaging[key]||'staged';
+      const colors={staged:'var(--blue)',loaded:'var(--green)',returned:'var(--yellow)'};
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+        <div style="flex:1;font-size:.82rem;">${e.name}</div>
+        <div style="font-size:.75rem;color:var(--muted);">×${e.qty}</div>
+        <button class="btn btn-sm" style="background:#13151f;color:${colors[s]};border:1px solid ${colors[s]}44;font-size:.68rem;min-width:72px;" onclick="cycleWhStaging('${j.id}','${key}')">${s.charAt(0).toUpperCase()+s.slice(1)}</button>
+      </div>`;
+    });
+  });
+  html+=`</div>`;
+  saveState();
+  document.getElementById('whAutoFillList').innerHTML=html;
+  toast(`⚡ Warehouse auto-filled from ${j.client} — ${j.pullSheet.length} items`);
+}
+
+function cycleWhStaging(jobId,key){
+  const j=getJob(jobId);
+  if(!j)return;
+  if(!j.whStaging)j.whStaging={};
+  const cycle=['staged','loaded','returned'];
+  const cur=j.whStaging[key]||'staged';
+  j.whStaging[key]=cycle[(cycle.indexOf(cur)+1)%cycle.length];
+  saveState();
+  autoFillWarehouse();
+}
+
+function scanItem(jobId,idx){
+  const j=getJob(jobId);
+  const e=j.pullSheet[idx];
+  const ci=STATUS_CYCLE.indexOf(e.status);
+  const nextStatus=STATUS_CYCLE[(ci+1)%STATUS_CYCLE.length];
+  e.status=nextStatus;
+  e.scannedAt=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+
+  // ROLLING STOCK LOGIC: when item scanned to 'returned' on a show with rollingTo,
+  // simultaneously register it as 'rolling-confirmed' on the destination show
+  if(nextStatus==='returned' && j.rollingTo){
+    const dest=state.jobs.find(x=>x.id===j.rollingTo);
+    if(dest){
+      const destItem=dest.pullSheet.find(d=>d.name===e.name);
+      if(destItem && destItem.status==='warehouse'){
+        destItem.status='rolling-in';
+        destItem.rollingFrom=j.id;
+        destItem.scannedAt=e.scannedAt;
+      }
+    }
+    // Check if all rollable items are confirmed — auto-flag rolling ready
+    const rollable=j.pullSheet.filter(x=>x.status==='returned'||x.status==='on-site');
+    if(rollable.length===j.pullSheet.length && !j.rollingReady){
+      j.rollingReady=true;
+      setTimeout(()=>toast(`🔄 All gear cleared — rolling to ${dest.client}!`),300);
+    }
+  }
+
+  // Show B: if item arrives from rolling, update readiness check
+  if(j.rollingFrom){
+    checkRollingReadiness(j);
+  }
+
+  saveState();renderPull();
+  const isRolling=nextStatus==='returned'&&j.rollingTo;
+  const dest=isRolling?state.jobs.find(x=>x.id===j.rollingTo):null;
+  toast(`📷 ${e.name} → ${STATUS_LABELS[nextStatus]||nextStatus}${isRolling&&dest?' 🔄 Rolling to '+dest.client:''}`);
+}
+
+function checkRollingReadiness(j){
+  if(!j.rollingFrom) return;
+  const src=state.jobs.find(x=>x.id===j.rollingFrom);
+  if(!src) return;
+  // Items that should roll from src to j
+  const rollingItems=j.pullSheet.filter(e=>e.rollingFrom===j.rollingFrom||e.status==='rolling-in');
+  const srcItems=src.pullSheet.filter(e=>e.status==='returned');
+  // Mark any matching items that came back from src as rolling-in on dest
+  srcItems.forEach(si=>{
+    const di=j.pullSheet.find(d=>d.name===si.name&&d.status==='warehouse');
+    if(di){di.status='rolling-in';di.rollingFrom=src.id;di.scannedAt=si.scannedAt;}
+  });
+  // Check if all items are accounted for
+  const allIn=j.pullSheet.every(e=>e.status!=='warehouse');
+  const missing=j.pullSheet.filter(e=>e.status==='warehouse');
+  if(allIn) j.rollingConfirmed=true;
+  else j.rollingMissing=missing.map(e=>e.name);
+}
+
+function scanAll(){
+  const j=getJob();if(!j)return;
+  j.pullSheet.forEach((e,i)=>{
+    if(e.status==='warehouse'){
+      e.status='pulled';
+      e.scannedAt=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    }
+  });
+  saveState();renderPull();toast('⚡ All items scanned out!');
+}
+
+function scanAllRolling(){
+  // Strike mode: scan all on-site items to 'returned' on Show A AND 'rolling-in' on Show B
+  const j=getJob();if(!j||!j.rollingTo)return;
+  const dest=state.jobs.find(x=>x.id===j.rollingTo);
+  if(!dest)return;
+  j.pullSheet.forEach(e=>{
+    if(e.status==='on-site'||e.status==='pulled'){
+      e.status='returned';
+      e.scannedAt=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const di=dest.pullSheet.find(d=>d.name===e.name);
+      if(di){di.status='rolling-in';di.rollingFrom=j.id;di.scannedAt=e.scannedAt;}
+    }
+  });
+  j.rollingReady=true;
+  checkRollingReadiness(dest);
+  saveState();renderPull();
+  toast(`🔄 All gear rolling to ${dest.client}!`);
+}
+
+function resetPull(){
+  const j=getJob();if(!j)return;
+  j.pullSheet.forEach(e=>{e.status='warehouse';delete e.scannedAt;delete e.rollingFrom;});
+  delete j.rollingReady;delete j.rollingConfirmed;delete j.rollingMissing;
+  saveState();renderPull();toast('↺ Pull sheet reset');
+}
+
+// ============ CREW ============
+const RANK_ICON={management:'⭐',lead:'🎯',warehouse:'🚛',wh_crew:'🚛',assistant:'👤',lasst:'💡',engineer:'🎚',band:'🎵'};
+const RANK_COLOR={management:'var(--purple)',lead:'var(--blue)',warehouse:'var(--green)',wh_crew:'var(--green)',assistant:'var(--muted)',lasst:'var(--yellow)',engineer:'#5eead4',band:'#f9a8d4'};
+const DEPT_ICON={management:'📋',audio:'🔊',lighting:'💡',warehouse:'🚛',band:'🎵'};
+
+function autoAssignCrew(includeBand=false){
+  const pick=(arr,n=1)=>[...arr].sort(()=>Math.random()-.5).slice(0,n);
+  const crew=[
+    ...pick(CREW_DB.filter(c=>c.rank==='management'),1),
+    ...pick(CREW_DB.filter(c=>c.rank==='lead'&&c.dept==='audio'),1),
+    ...pick(CREW_DB.filter(c=>c.rank==='lead'&&c.dept==='lighting'),1),
+    ...pick(CREW_DB.filter(c=>c.rank==='engineer'),1),
+    ...pick(CREW_DB.filter(c=>c.rank==='warehouse'),1),
+    ...pick(CREW_DB.filter(c=>c.rank==='wh_crew'),1),
+    ...pick(CREW_DB.filter(c=>c.rank==='assistant'),Math.floor(Math.random()*3)+2),
+    ...pick(CREW_DB.filter(c=>c.rank==='lasst'),Math.floor(Math.random()*3)+2),
+  ];
+  if(includeBand) crew.push(...pick(CREW_DB.filter(c=>c.rank==='band'),Math.floor(Math.random()*4)+3));
+  return crew;
+}
+
+function calcCrewBudget(job){
+  const hasStrike=job.status!=='completed';
+  return job.crew.reduce((sum,id)=>{
+    const c=CREW_DB.find(x=>x.id===id);
+    if(!c)return sum;
+    return sum+crewPay(c,hasStrike).total;
+  },0);
+}
+
+function renderCrew(){
+  renderJobSelector('crewJobSelector');
+  const j=getJob();
+  const el=document.getElementById('crewList');
+  if(!j||!j.crew.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">👥</div><p>No crew assigned yet</p><p style="margin-top:8px;font-size:.8rem">Tap "Assign Crew" to auto-assign the team</p></div>';return;
+  }
+  const sections=[
+    {key:'management', label:'⭐ Management'},
+    {key:'warehouse',  label:'🚛 Warehouse / Driver', filter:c=>c.rank==='warehouse'||c.rank==='wh_crew'},
+    {key:'audio_leads',label:'🔊 Audio Leads',        filter:c=>c.rank==='lead'&&c.dept==='audio'},
+    {key:'engineers',  label:'🎚 Audio Engineers',    filter:c=>c.rank==='engineer'},
+    {key:'light_leads',label:'💡 Lighting Leads',     filter:c=>c.rank==='lead'&&c.dept==='lighting'},
+    {key:'assistant',  label:'👤 Audio Assistants',   filter:c=>c.rank==='assistant'},
+    {key:'lasst',      label:'💡 Lighting Assistants',filter:c=>c.rank==='lasst'},
+    {key:'band',       label:'🎵 Band / Performers',  filter:c=>c.rank==='band'},
+  ];
+  let html='';
+  sections.forEach(sec=>{
+    const filterFn=sec.filter||(c=>c.rank===sec.key||c.dept===sec.key);
+    const members=j.crew.map(id=>CREW_DB.find(c=>c.id===id)).filter(c=>c&&filterFn(c));
+    if(!members.length)return;
+    html+=`<div class="crew-section"><h3>${sec.label} <span style="color:var(--muted);font-weight:400">(${members.length})</span></h3>`;
+    members.forEach(c=>html+=crewCard(j,c));
+    html+='</div>';
+  });
+  // summary bar
+  const total=j.crew.length;
+  const budget=calcCrewBudget(j);
+  html=`<div class="card" style="margin-bottom:14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+    <div><span style="font-size:1.2rem;font-weight:800;color:var(--blue)">${total}</span><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Crew</div></div>
+    ${['management','lead','engineer','warehouse','wh_crew','assistant','lasst','band'].map(r=>{
+      const n=j.crew.filter(id=>CREW_DB.find(c=>c.id===id)?.rank===r).length;
+      return n?`<div><span style="font-size:1.1rem;font-weight:800;color:${RANK_COLOR[r]}">${n}</span><div style="font-size:.62rem;color:var(--muted);text-transform:uppercase">${RANK_ICON[r]}</div></div>`:'';
+    }).join('')}
+    <div style="margin-left:auto;text-align:right"><span style="font-size:1.1rem;font-weight:800;color:var(--green)">$${budget.toLocaleString()}</span><div style="font-size:.65rem;color:var(--muted);text-transform:uppercase">Crew Budget</div></div>
+  </div>`+html;
+  el.innerHTML=html;
+}
+
+function crewCard(j,c){
+  const st=j.crewStatus[c.id]||'assigned';
+  const pay=crewPay(c, j.status!=='completed');
+  return `<div class="crew-card" onclick="cycleCrewStatus('${j.id}','${c.id}')">
+    <div class="crew-avatar" style="background:${c.color};color:${RANK_COLOR[c.rank]||'var(--blue)'};width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0">${c.avatar}</div>
+    <div class="crew-info">
+      <h4>${c.name} <span style="font-size:.65rem;color:${RANK_COLOR[c.rank]}">${RANK_ICON[c.rank]}</span></h4>
+      <p style="font-size:.72rem;">${c.role}</p>
+      <p style="font-size:.68rem;color:var(--green)">$${pay.total} · ${pay.breakdown}</p>
+    </div>
+    <span class="badge ${CREW_STATUS_BADGE[st]}">${st}</span>
+  </div>`;
+}
+
+function cycleCrewStatus(jobId,crewId){
+  const j=getJob(jobId);
+  const st=j.crewStatus[crewId]||'assigned';
+  const ci=CREW_STATUS_CYCLE.indexOf(st);
+  j.crewStatus[crewId]=CREW_STATUS_CYCLE[(ci+1)%CREW_STATUS_CYCLE.length];
+  saveState();renderCrew();
+  const c=CREW_DB.find(x=>x.id===crewId);
+  toast(`${c.name} → ${j.crewStatus[crewId]}`);
+}
+
+function assignCrew(){
+  const j=getJob();if(!j)return;
+  if(j.crew.length){toast('Crew already assigned! Reset job to reassign.');return;}
+  const crew=autoAssignCrew();
+  j.crew=crew.map(c=>c.id);
+  j.crewStatus={};
+  crew.forEach(c=>j.crewStatus[c.id]='assigned');
+  saveState();renderCrew();
+  toast(`✅ ${crew.length} crew assigned — alerts sent!`);
+}
+
+// ============ TIMELINE ============
+function renderTimeline(){
+  renderJobSelector('tlJobSelector');
+  const j=getJob();
+  const el=document.getElementById('timelineList');
+  if(!j){el.innerHTML='';return;}
+  const done=j.milestones.filter(m=>m.done).length;
+  const total=j.milestones.length;
+  const pct=Math.round(done/total*100);
+  document.getElementById('tlProgress').innerHTML=`
+    <div class="progress-label"><span style="font-weight:700">${done} of ${total} milestones</span><span style="color:var(--blue)">${pct}%</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+  let html='';
+  j.milestones.forEach((m,i)=>{
+    const isNext=!m.done&&(i===0||j.milestones[i-1].done);
+    const isLast=i===j.milestones.length-1;
+    html+=`<div class="tl-item ${m.done?'done':''} ${isNext?'active-ms':''}">
+      ${!isLast?'<div class="tl-line"></div>':''}
+      <div class="tl-dot"></div>
+      <div class="tl-content" onclick="toggleMilestone('${j.id}',${i})">
+        <h4>${m.name}</h4>
+        <p>${m.done?'✅ Completed'+(m.time?' · '+m.time:''):isNext?'⏳ Up next — tap to complete':'Pending'}</p>
+      </div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+function toggleMilestone(jobId,idx){
+  const j=getJob(jobId);
+  const m=j.milestones[idx];
+  m.done=!m.done;
+  m.time=m.done?new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):null;
+  saveState();renderTimeline();
+  toast(m.done?`✅ ${m.name}`:`↺ Reset: ${m.name}`);
+}
+
+// ============ SALES ============
+function renderSales(){
+  // Sales team cards
+  const totalRevenue=SALES_DB.reduce((s,p)=>s+p.revenue,0);
+  const totalDeals=SALES_DB.reduce((s,p)=>s+p.deals,0);
+  let html=`<div class="stats-row" style="margin-bottom:16px;">
+    <div class="stat-box"><div class="num" style="color:var(--green)">$${(totalRevenue/1000).toFixed(0)}k</div><div class="lbl">Total Revenue</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--blue)">${totalDeals}</div><div class="lbl">Deals Closed</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--purple)">${SALES_DB.length}</div><div class="lbl">Sales Team</div></div>
+  </div>`;
+  SALES_DB.forEach(p=>{
+    const pct=Math.round(p.revenue/totalRevenue*100);
+    html+=`<div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="crew-avatar" style="background:#1a2a3a;color:var(--blue);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${p.avatar}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:.9rem">${p.name}</div>
+          <div style="font-size:.75rem;color:var(--muted)">${p.role}</div>
+          <div style="display:flex;gap:12px;margin-top:4px;">
+            <span style="font-size:.75rem;color:var(--green);font-weight:700">$${p.revenue.toLocaleString()}</span>
+            <span style="font-size:.75rem;color:var(--muted)">${p.deals} deals</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.7rem;color:var(--muted)">Share</div>
+          <div style="font-size:1rem;font-weight:800;color:var(--blue)">${pct}%</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('salesTeam').innerHTML=html;
+
+  // Job comms selector
+  renderJobSelector('salesJobSelector');
+  renderSalesJobPanel();
+}
+
+function renderSalesJobPanel(){
+  const j=getJob();
+  if(!j){document.getElementById('salesComms').innerHTML='<div class="empty-state"><div class="icon">📬</div><p>Select a job</p></div>';return;}
+  const msgs=j.messages||[];
+  const lead=j.crew.map(id=>CREW_DB.find(c=>c.id===id)).find(c=>c&&c.rank==='lead');
+  const budget=calcCrewBudget(j);
+  const remaining=j.budget-budget;
+  let html=`<div class="card" style="margin-bottom:12px;">
+    <div style="font-size:.75rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Job Controls — ${j.type} · ${j.client}</div>
+    <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+      <div><div style="font-size:1rem;font-weight:800;color:var(--green)">$${j.budget.toLocaleString()}</div><div style="font-size:.65rem;color:var(--muted)">Show Budget</div></div>
+      <div><div style="font-size:1rem;font-weight:800;color:${budget>j.budget?'var(--red)':'var(--yellow)'}">$${budget.toLocaleString()}</div><div style="font-size:.65rem;color:var(--muted)">Crew Cost</div></div>
+      <div><div style="font-size:1rem;font-weight:800;color:${remaining<0?'var(--red)':'var(--blue)'}">$${remaining.toLocaleString()}</div><div style="font-size:.65rem;color:var(--muted)">Remaining</div></div>
+      <div><div style="font-size:1rem;font-weight:800;color:var(--muted)">${j.crew.length}</div><div style="font-size:.65rem;color:var(--muted)">Crew Count</div></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-outline btn-sm" onclick="openEditJob('pull')">✏️ Pull Sheet</button>
+      <button class="btn btn-outline btn-sm" onclick="openEditJob('crew')">👥 Edit Crew</button>
+      <button class="btn btn-outline btn-sm" onclick="openEditJob('timeline')">⏱ Timeline</button>
+      <button class="btn btn-primary btn-sm" onclick="openComms('${j.id}')">📬 Message Lead${lead?' · '+lead.name.split(' ')[0]:''}</button>
+    </div>
+  </div>`;
+
+  // Recent messages
+  if(msgs.length){
+    html+=`<div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Recent Messages</div>`;
+    msgs.slice(-3).forEach(m=>{
+      const isSales=m.from==='sales';
+      html+=`<div style="display:flex;justify-content:${isSales?'flex-end':'flex-start'};margin-bottom:8px;">
+        <div style="max-width:80%;background:${isSales?'#1a2a3a':'#1a1d27'};border:1px solid ${isSales?'var(--blue)22':'var(--border)'};border-radius:12px;padding:8px 12px;">
+          <div style="font-size:.7rem;color:var(--muted);margin-bottom:3px;">${m.sender} · ${m.time}</div>
+          <div style="font-size:.85rem;">${m.text}</div>
+        </div>
+      </div>`;
+    });
+    if(msgs.length>3)html+=`<div style="text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:8px;">+ ${msgs.length-3} earlier messages</div>`;
+  } else {
+    html+=`<div class="empty-state" style="padding:20px"><div class="icon">💬</div><p>No messages yet</p><p style="font-size:.78rem;margin-top:6px">Message the on-site lead to coordinate</p></div>`;
+  }
+  document.getElementById('salesComms').innerHTML=html;
+}
+
+// COMMS
+let commsJobId=null;
+function openComms(jobId){
+  commsJobId=jobId;
+  renderCommsThread();
+  document.getElementById('commsModal').classList.remove('hidden');
+}
+function closeCommsModal(){document.getElementById('commsModal').classList.add('hidden');}
+function renderCommsThread(){
+  const j=getJob(commsJobId);
+  const msgs=j.messages||[];
+  const lead=j.crew.map(id=>CREW_DB.find(c=>c.id===id)).find(c=>c&&c.rank==='lead');
+  const el=document.getElementById('commsThread');
+  if(!msgs.length){el.innerHTML=`<div style="text-align:center;padding:20px;color:var(--muted);font-size:.85rem">Start a conversation with ${lead?lead.name:'the on-site lead'}</div>`;return;}
+  el.innerHTML=msgs.map(m=>{
+    const isSales=m.from==='sales';
+    return `<div style="display:flex;justify-content:${isSales?'flex-end':'flex-start'};margin-bottom:10px;">
+      <div style="max-width:85%;background:${isSales?'#1a2a3a':'#1a1d27'};border:1px solid ${isSales?'var(--blue)33':'var(--border)'};border-radius:12px;padding:10px 14px;">
+        <div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;">${m.sender} · ${m.time}</div>
+        <div style="font-size:.88rem;">${m.text}</div>
+      </div>
+    </div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function sendCommsMsg(){
+  const input=document.getElementById('commsInput');
+  const text=input.value.trim();
+  if(!text)return;
+  const j=getJob(commsJobId);
+  if(!j.messages)j.messages=[];
+  const sales=SALES_DB[0];
+  j.messages.push({from:'sales',sender:sales.name,text,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
+  input.value='';
+  // Simulate lead reply after 1.5s
+  setTimeout(()=>{
+    const lead=j.crew.map(id=>CREW_DB.find(c=>c.id===id)).find(c=>c&&c.rank==='lead');
+    const replies=['Copy that, on it.','Got it. Will update.','10-4.','Confirmed, we\'re on track.','Roger. Crew is aware.'];
+    if(lead){
+      j.messages.push({from:'lead',sender:lead.name,text:replies[Math.floor(Math.random()*replies.length)],time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
+      saveState();renderCommsThread();renderSalesJobPanel();
+    }
+  },1500);
+  saveState();renderCommsThread();
+}
+
+// JOB EDIT
+let editSection='pull';
+function openEditJob(section){
+  editSection=section;
+  renderEditJobContent();
+  document.getElementById('editJobModal').classList.remove('hidden');
+}
+function closeEditModal(){document.getElementById('editJobModal').classList.add('hidden');}
+function renderEditJobContent(){
+  const j=getJob();
+  const el=document.getElementById('editJobContent');
+  if(editSection==='pull'){
+    const cats={audio:'🔊 AUDIO',lighting:'💡 LIGHTING',power:'⚡ STRUCTURES & POWER'};
+    let html='<div style="font-size:.75rem;color:var(--muted);margin-bottom:12px;">Adjust quantities for this job\'s pull sheet.</div>';
+    Object.keys(cats).forEach(cat=>{
+      html+=`<div class="cat-header">${cats[cat]}</div>`;
+      j.pullSheet.filter(e=>e.cat===cat).forEach((e,i)=>{
+        const gi=j.pullSheet.indexOf(e);
+        html+=`<div class="eq-row">
+          <div class="eq-dot ${cat}"></div>
+          <span class="eq-name" style="flex:1">${e.name}</span>
+          <input type="number" min="0" value="${e.qty}" style="width:52px;background:#0a0c12;border:1px solid var(--border);border-radius:6px;padding:4px 6px;color:var(--text);text-align:center;" onchange="updatePullQty('${j.id}',${gi},this.value)">
+        </div>`;
+      });
+    });
+    el.innerHTML=html;
+  } else if(editSection==='crew'){
+    let html='<div style="font-size:.75rem;color:var(--muted);margin-bottom:12px;">Tap to add/remove crew from this job.</div>';
+    const assigned=new Set(j.crew);
+    CREW_DB.forEach(c=>{
+      const on=assigned.has(c.id);
+      html+=`<div class="crew-card" style="opacity:${on?1:.5}" onclick="toggleCrewMember('${j.id}','${c.id}')">
+        <div class="crew-avatar" style="background:${c.color};color:${RANK_COLOR[c.rank]}">${c.avatar}</div>
+        <div class="crew-info"><h4>${c.name} ${RANK_ICON[c.rank]}</h4><p>${c.role}</p></div>
+        <span class="badge ${on?'badge-green':'badge-gray'}">${on?'On Show':'Available'}</span>
+      </div>`;
+    });
+    el.innerHTML=html;
+  } else if(editSection==='timeline'){
+    let html='<div style="font-size:.75rem;color:var(--muted);margin-bottom:12px;">Tap a milestone to toggle completion.</div>';
+    j.milestones.forEach((m,i)=>{
+      html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)22;cursor:pointer;" onclick="toggleMilestone('${j.id}',${i});renderEditJobContent();">
+        <span style="font-size:1.1rem">${m.done?'✅':'⬜'}</span>
+        <span style="flex:1;font-size:.88rem;${m.done?'color:var(--muted);text-decoration:line-through':''}">${m.name}</span>
+        ${m.time?`<span style="font-size:.7rem;color:var(--muted)">${m.time}</span>`:''}
+      </div>`;
+    });
+    el.innerHTML=html;
+  }
+}
+function updatePullQty(jobId,idx,val){
+  const j=getJob(jobId);
+  j.pullSheet[idx].qty=parseInt(val)||0;
+  saveState();toast('Pull sheet updated');
+}
+function toggleCrewMember(jobId,crewId){
+  const j=getJob(jobId);
+  const idx=j.crew.indexOf(crewId);
+  if(idx>-1){j.crew.splice(idx,1);delete j.crewStatus[crewId];}
+  else{j.crew.push(crewId);j.crewStatus[crewId]='assigned';}
+  saveState();renderEditJobContent();
+  const c=CREW_DB.find(x=>x.id===crewId);
+  toast(j.crew.includes(crewId)?`+ ${c.name} added`:`- ${c.name} removed`);
+}
+function saveJobEdit(){closeEditModal();saveState();renderAll();toast('✅ Changes saved');}
+
+// ============ WAREHOUSE ============
+const WH_CHECKLIST = [
+  'Pull sheet received & reviewed',
+  'All gear located in warehouse',
+  'Gear inspected for damage',
+  'Gear cleaned & prepped',
+  'Cables tested & coiled',
+  'Road cases packed & labeled',
+  'Truck loaded & secured',
+  'Gear manifest signed off',
+  'Truck departed for venue',
+];
+
+function renderWarehouse(){
+  renderJobSelector('whJobSelector');
+  const j=getJob();
+  const reports=j?(j.gearReports||[]):[];
+  const missing=reports.filter(r=>r.type==='missing').length;
+  const damaged=reports.filter(r=>r.type==='damaged').length;
+  const whCrew=CREW_DB.filter(c=>c.rank==='warehouse'||c.rank==='wh_crew');
+
+  document.getElementById('whStats').innerHTML=`
+    <div class="stat-box"><div class="num" style="color:var(--green)">${whCrew.length}</div><div class="lbl">WH Crew</div></div>
+    <div class="stat-box"><div class="num" style="color:${missing>0?'var(--red)':'var(--green)'}">  ${missing}</div><div class="lbl">Missing</div></div>
+    <div class="stat-box"><div class="num" style="color:${damaged>0?'var(--yellow)':'var(--green)'}">${damaged}</div><div class="lbl">Damaged</div></div>`;
+
+  if(!j){document.getElementById('warehouseContent').innerHTML='<div class="empty-state"><div class="icon">🏭</div><p>Select a job to begin</p></div>';return;}
+
+  const salesRep=SALES_DB.find(s=>s.name.toLowerCase().includes('emmanuel'))||SALES_DB[0];
+  const checklist=j.whChecklist||WH_CHECKLIST.map(t=>({task:t,done:false}));
+  if(!j.whChecklist){j.whChecklist=checklist;saveState();}
+  const checkDone=checklist.filter(t=>t.done).length;
+  const checkPct=Math.round(checkDone/checklist.length*100);
+
+  // Pull sheet summary
+  const pulled=j.pullSheet.filter(e=>e.status!=='warehouse').length;
+  const total=j.pullSheet.length;
+  const returnPending=j.pullSheet.filter(e=>e.status==='on-site').length;
+
+  let html=`
+  <!-- WAREHOUSE AUTO-FILL -->
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <button class="btn btn-sm" style="background:#1a2a3a;color:var(--blue);border:1px solid var(--blue)44;" onclick="autoFillWarehouse()">⚡ Auto-Fill from Job</button>
+    <button class="btn btn-outline btn-sm" onclick="renderWarehouse()">↺ Refresh</button>
+  </div>
+  <div id="whAutoFillList"></div>
+
+  <!-- ORDER REVIEW WITH SALES REP -->
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+      <div style="font-size:1.1rem">📋</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:.9rem">Order Review</div>
+        <div style="font-size:.72rem;color:var(--muted)">Sales Rep: ${salesRep.name} · ${salesRep.role}</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openComms('${j.id}')">📬 Message Rep</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div style="text-align:center;padding:8px;background:#13151f;border-radius:8px;">
+        <div style="font-size:1rem;font-weight:800;color:var(--blue)">${total}</div>
+        <div style="font-size:.65rem;color:var(--muted)">Items on Order</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:#13151f;border-radius:8px;">
+        <div style="font-size:1rem;font-weight:800;color:var(--yellow)">${pulled}</div>
+        <div style="font-size:.65rem;color:var(--muted)">Pulled</div>
+      </div>
+      <div style="text-align:center;padding:8px;background:#13151f;border-radius:8px;">
+        <div style="font-size:1rem;font-weight:800;color:${returnPending>0?'var(--purple)':'var(--green)'}">${returnPending}</div>
+        <div style="font-size:.65rem;color:var(--muted)">Awaiting Return</div>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="switchTab('pull',document.querySelectorAll('.nav-btn')[1])" style="width:100%">📋 View Full Pull Sheet →</button>
+  </div>
+
+  <!-- WAREHOUSE CHECKLIST -->
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="font-weight:700;font-size:.9rem">🏭 Warehouse Checklist</div>
+      <span style="font-size:.75rem;color:var(--blue)">${checkDone}/${checklist.length} · ${checkPct}%</span>
+    </div>
+    <div class="progress-bar" style="margin:0 0 12px"><div class="progress-fill" style="width:${checkPct}%"></div></div>
+    ${checklist.map((t,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)22;cursor:pointer;" onclick="toggleWhCheck('${j.id}',${i})">
+        <span style="font-size:1.1rem">${t.done?'✅':'⬜'}</span>
+        <span style="flex:1;font-size:.85rem;${t.done?'color:var(--muted);text-decoration:line-through':''}">${t.task}</span>
+        ${t.time?`<span style="font-size:.68rem;color:var(--muted)">${t.time}</span>`:''}
+      </div>`).join('')}
+  </div>
+
+  <!-- GEAR REPORTS -->
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="font-weight:700;font-size:.9rem">🔧 Gear Reports</div>
+      <button class="btn btn-outline btn-sm" onclick="openGearReport('${j.id}')">+ New Report</button>
+    </div>
+    ${reports.length===0?`<div style="text-align:center;padding:16px;color:var(--muted);font-size:.82rem">No reports filed — all gear accounted for ✅</div>`
+    :reports.map(r=>{
+      const icons={missing:'❌',damaged:'⚠️',cleaned:'✅',note:'📝'};
+      const colors={missing:'var(--red)',damaged:'var(--yellow)',cleaned:'var(--green)',note:'var(--muted)'};
+      return `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)22;">
+        <span style="font-size:1.1rem">${icons[r.type]||'📝'}</span>
+        <div style="flex:1">
+          <div style="font-size:.85rem;font-weight:600;color:${colors[r.type]}">${r.item}</div>
+          <div style="font-size:.75rem;color:var(--muted)">${r.detail}</div>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:2px">By ${r.reporter} · ${r.time}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- GEAR STATUS OVERVIEW (quick scan) -->
+  <div class="card" style="margin-bottom:12px;">
+    <div style="font-weight:700;font-size:.9rem;margin-bottom:10px;">📦 Gear Status by Category</div>
+    ${['audio','lighting','power','tools'].map(cat=>{
+      const items=j.pullSheet.filter(e=>e.cat===cat);
+      if(!items.length)return'';
+      const catDone=items.filter(e=>e.status!=='warehouse').length;
+      const catPct=Math.round(catDone/items.length*100);
+      const catLabel={audio:'🔊 Audio',lighting:'💡 Lighting',power:'⚡ Power & Structure',tools:'🪜 Ladders & Tools'}[cat];
+      return `<div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;">
+          <span>${catLabel}</span><span style="color:var(--blue)">${catDone}/${items.length}</span>
+        </div>
+        <div class="progress-bar" style="margin:0"><div class="progress-fill" style="width:${catPct}%"></div></div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- ROLLING STOCK PANEL -->
+  ${(j.rollingTo||j.rollingFrom)?`
+  <div class="card" style="margin-bottom:12px;border-color:${j.rollingTo?'var(--green)44':'var(--blue)44'}">
+    <div style="font-weight:700;font-size:.9rem;margin-bottom:10px;">🔄 Rolling Stock</div>
+    ${j.rollingTo?`
+      <div style="background:#1a3a1a;border-radius:8px;padding:12px;margin-bottom:8px;">
+        <div style="font-size:.75rem;color:var(--green);font-weight:700;margin-bottom:4px;">OUTBOUND → ${(state.jobs.find(x=>x.id===j.rollingTo)||{}).client||'Next Show'}</div>
+        <div style="font-size:.8rem;color:var(--text)">After strike, gear routes DIRECTLY to this show. Do NOT return to warehouse.</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:6px;">${(()=>{const d=state.jobs.find(x=>x.id===j.rollingTo);return d?`Load-in: ${formatTime(d.loadIn,d.tz||'America/Phoenix',{date:d.date})} · ${d.venue}`:'';})()}</div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button class="btn btn-sm" style="background:#1a3a1a;color:var(--green);border:1px solid var(--green)44" onclick="flagRollingReady('${j.id}')">✅ Mark Gear Ready to Roll</button>
+          <button class="btn btn-outline btn-sm" onclick="selectJob('${j.rollingTo}');switchTab('pull',document.querySelectorAll('.nav-btn')[1])">📋 View Receiving Pull Sheet →</button>
+        </div>
+      </div>` : ''}
+    ${j.rollingFrom?`
+      <div style="background:#1a2a3a;border-radius:8px;padding:12px;">
+        <div style="font-size:.75rem;color:var(--blue);font-weight:700;margin-bottom:4px;">INBOUND ← ${(state.jobs.find(x=>x.id===j.rollingFrom)||{}).client||'Prior Show'}</div>
+        <div style="font-size:.8rem;color:var(--text)">Gear arriving directly from prior show's strike. Confirm receipt on-site.</div>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:6px;">Source: ${(state.jobs.find(x=>x.id===j.rollingFrom)||{}).venue||'TBD'}</div>
+        <div style="margin-top:8px;">
+          <span style="font-size:.75rem;font-weight:700;color:${(state.jobs.find(x=>x.id===j.rollingFrom)||{}).rollingReady?'var(--green)':'var(--yellow)'}">
+            ${(state.jobs.find(x=>x.id===j.rollingFrom)||{}).rollingReady?'✅ Gear marked ready to roll':'⏳ Waiting for source show to clear strike'}
+          </span>
+        </div>
+      </div>` : ''}
+  </div>` : ''}
+
+  <!-- WAREHOUSE CREW ON DUTY -->
+  <div class="section-title">🚛 Warehouse Crew</div>
+  ${CREW_DB.filter(c=>c.rank==='warehouse'||c.rank==='wh_crew').map(c=>{
+    const onJob=j.crew.includes(c.id);
+    const st=j.crewStatus[c.id];
+    return `<div class="crew-card" style="opacity:${onJob?1:.45}">
+      <div class="crew-avatar" style="background:#1a3a2a;color:var(--green);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0">${c.avatar}</div>
+      <div class="crew-info"><h4>${c.name}</h4><p style="font-size:.72rem;">${c.role}</p></div>
+      ${onJob?`<span class="badge ${CREW_STATUS_BADGE[st||'assigned']}">${st||'assigned'}</span>`:`<span class="badge badge-gray">Not on show</span>`}
+    </div>`;
+  }).join('')}`;
+
+  document.getElementById('warehouseContent').innerHTML=html;
+}
+
+function flagRollingReady(jobId){
+  const j=getJob(jobId);
+  j.rollingReady=true;
+  saveState();renderWarehouse();
+  const dest=state.jobs.find(x=>x.id===j.rollingTo);
+  toast(`🔄 Gear flagged ready to roll → ${dest?dest.client:'next show'}`);
+}
+
+function toggleWhCheck(jobId,idx){
+  const j=getJob(jobId);
+  if(!j.whChecklist)j.whChecklist=WH_CHECKLIST.map(t=>({task:t,done:false}));
+  j.whChecklist[idx].done=!j.whChecklist[idx].done;
+  j.whChecklist[idx].time=j.whChecklist[idx].done?new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):null;
+  saveState();renderWarehouse();
+  toast(j.whChecklist[idx].done?`✅ ${j.whChecklist[idx].task}`:`↺ Reset: ${j.whChecklist[idx].task}`);
+}
+
+let gearReportJobId=null;
+function openGearReport(jobId){gearReportJobId=jobId;document.getElementById('gearReportModal').classList.remove('hidden');}
+function closeGearReport(){document.getElementById('gearReportModal').classList.add('hidden');}
+function submitGearReport(){
+  const j=getJob(gearReportJobId);
+  if(!j.gearReports)j.gearReports=[];
+  const type=document.getElementById('rType').value;
+  const item=document.getElementById('rItem').value.trim()||'Unknown item';
+  const detail=document.getElementById('rDetail').value.trim()||'No details provided';
+  const reporter=document.getElementById('rReporter').value;
+  j.gearReports.push({type,item,detail,reporter,time:new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})});
+  document.getElementById('rItem').value='';
+  document.getElementById('rDetail').value='';
+  saveState();closeGearReport();renderWarehouse();
+  toast(`${type==='missing'?'❌':type==='damaged'?'⚠️':'✅'} Report filed: ${item}`);
+}
+
+// ============ INVENTORY ============
+let invFilter='';
+function renderInventory(){
+  const allItems=MASTER_INVENTORY;
+  const assigned=state.jobs.filter(j=>j.status==='active').flatMap(j=>j.pullSheet||[]);
+  const countAssigned=(name)=>assigned.filter(e=>e.name===name&&e.status==='pulled').length;
+  const countOnsite=(name)=>assigned.filter(e=>e.name===name&&e.status==='on-site').length;
+  const filtered=allItems.filter(e=>!invFilter||e.name.toLowerCase().includes(invFilter.toLowerCase()));
+  const totalItems=allItems.reduce((s,e)=>s+e.qty,0);
+  const totalAssigned=allItems.reduce((s,e)=>s+countAssigned(e.name),0);
+  const totalOnsite=allItems.reduce((s,e)=>s+countOnsite(e.name),0);
+  document.getElementById('invStats').innerHTML=`
+    <div class="stat-box"><div class="num" style="color:var(--text)">${allItems.length}</div><div class="lbl">Item Types</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--yellow)">${totalAssigned}</div><div class="lbl">Pulled</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--blue)">${totalOnsite}</div><div class="lbl">On-Site</div></div>`;
+  const cats={audio:'🔊 AUDIO',lighting:'💡 LIGHTING',power:'⚡ STRUCTURES & POWER',tools:'🪜 LADDERS & TOOLS'};
+  let html='';
+  Object.keys(cats).forEach(cat=>{
+    const items=filtered.filter(e=>e.cat===cat);
+    if(!items.length)return;
+    html+=`<div class="cat-header">${cats[cat]}</div>`;
+    items.forEach(e=>{
+      const asgn=countAssigned(e.name);
+      const onsite=countOnsite(e.name);
+      const avail=e.qty-asgn-onsite;
+      const pct=e.qty?Math.round((e.qty-avail)/e.qty*100):0;
+      html+=`<div class="inv-row">
+        <div class="eq-dot ${cat==='tools'?'power':cat}"></div>
+        <span class="inv-name">${e.name}</span>
+        <span class="inv-stat" style="color:var(--green)">${avail}</span>
+        <div class="inv-bar"><div class="inv-bar-fill" style="width:${pct}%;background:${onsite?'var(--blue)':asgn?'var(--yellow)':'var(--green)'}"></div></div>
+        <span class="inv-stat" style="color:var(--muted)">/${e.qty}</span>
+      </div>`;
+    });
+  });
+  document.getElementById('inventoryList').innerHTML=html||'<div class="empty-state"><div class="icon">🔍</div><p>No results</p></div>';
+}
+function filterInventory(v){invFilter=v;renderInventory();}
+
+// ============ JOB SELECTOR ============
+function renderJobSelector(elId){
+  const el=document.getElementById(elId);
+  el.innerHTML=state.jobs.map(j=>`<button class="job-chip ${state.selectedJob===j.id?'selected':''}" onclick="selectJob('${j.id}')">${j.type} · ${j.client}</button>`).join('');
+}
+
+// ============ NEW JOB MODAL ============
+function openNewJob(){initNewJobTz();document.getElementById('newJobModal').classList.remove('hidden');}
+function closeModal(){document.getElementById('newJobModal').classList.add('hidden');}
+function createJob(){
+  const type=document.getElementById('fType').value;
+  const client=document.getElementById('fClient').value.trim()||'New Client';
+  const venue=document.getElementById('fVenue').value.trim()||'TBD';
+  const date=document.getElementById('fDate').value||new Date().toISOString().split('T')[0];
+  const loadIn=document.getElementById('fLoadIn').value||'08:00';
+  const budget=parseInt(document.getElementById('fBudget').value)||0;
+  const includeBand=document.getElementById('fBand').value==='1';
+  const tz=document.getElementById('fTz').value||Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const id='j'+Date.now();
+  const crew=autoAssignCrew(includeBand);
+  const crewStatus={};crew.forEach(c=>crewStatus[c.id]='assigned');
+  const newJob={
+    id,type,client,venue,date,loadIn,budget,tz,status:'upcoming',
+    pullSheet:WEDDING_TEMPLATE.map(e=>({...e,status:'warehouse'})),
+    crew:crew.map(c=>c.id),crewStatus,
+    milestones:MILESTONES.map(m=>({name:m,done:false,time:null}))
+  };
+  state.jobs.unshift(newJob);
+  state.selectedJob=id;
+  saveState();closeModal();
+  switchTab('pull',document.querySelectorAll('.nav-btn')[1]);
+  toast(`⚡ Job created! Pull sheet auto-populated (${WEDDING_TEMPLATE.length} items)`);
+}
+
+// ============ ROLE / AUTH ============
+const ROLES = {
+  crew:       {label:'Crew',       icon:'👤', color:'var(--muted)',  bg:'#1a1a1a'},
+  ops:        {label:'Ops / WH',   icon:'🚛', color:'var(--green)', bg:'#1a3a2a'},
+  management: {label:'Management', icon:'⭐', color:'var(--purple)',bg:'#2a1a3a'},
+};
+
+const NAV_BY_ROLE = {
+  crew: [
+    {tab:'myshow', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', label:'My Show'},
+    {tab:'pull',   icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>', label:'Pull Sheet'},
+    {tab:'timeline',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', label:'Timeline'},
+  ],
+  ops: [
+    {tab:'jobs',      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>', label:'Jobs'},
+    {tab:'pull',      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>', label:'Pull Sheet'},
+    {tab:'warehouse', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', label:'Warehouse'},
+    {tab:'timeline',  icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', label:'Timeline'},
+    {tab:'inventory', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>', label:'Inventory'},
+  ],
+  management: [
+    {tab:'jobs',      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>', label:'Shows'},
+    {tab:'sales',     icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>', label:'Sales'},
+    {tab:'crm',       icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/></svg>', label:'Clients'},
+    {tab:'crew',      icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>', label:'Crew'},
+    {tab:'warehouse', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>', label:'Warehouse'},
+    {tab:'inventory', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>', label:'Inventory'},
+  ],
+};
+
+let currentRole = null;
+
+// ── AUTO-LOGIN FROM URL PARAM ──
+(function(){
+  const p = new URLSearchParams(window.location.search).get('role');
+  if(p && ['crew','ops','management'].includes(p)){
+    window.addEventListener('DOMContentLoaded', function(){ setRole(p); });
+  }
+})();
+
+function setRole(role){
+  currentRole = role;
+  const r = ROLES[role];
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('app').style.flexDirection='column';
+  document.getElementById('app').style.height='100vh';
+  // Role badge
+  const badge = document.getElementById('roleBadge');
+  badge.textContent = r.icon+' '+r.label;
+  badge.style.background = r.bg;
+  badge.style.color = r.color;
+  badge.style.border = `1px solid ${r.color}44`;
+  // Build nav
+  buildNav(role);
+  // Default tab
+  const firstTab = NAV_BY_ROLE[role][0].tab;
+  const firstBtn = document.querySelector('#mainNav .nav-btn');
+  switchTab(firstTab, firstBtn);
+}
+
+function buildNav(role){
+  const nav = document.getElementById('mainNav');
+  const tabs = NAV_BY_ROLE[role];
+  nav.innerHTML = tabs.map((t,i)=>`
+    <button class="nav-btn${i===0?' active':''}" onclick="switchTab('${t.tab}',this)">
+      ${t.icon}
+      <span style="font-size:.55rem;text-transform:uppercase;letter-spacing:.05em;">${t.label}</span>
+    </button>`).join('');
+}
+
+function logout(){
+  currentRole=null;
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+// ============ MY SHOW (CREW VIEW) ============
+function renderMyShow(){
+  // Pick first active job that has current crew (in demo: just show j1)
+  const j = state.jobs.find(x=>x.status==='active') || state.jobs[0];
+  if(!j){document.getElementById('myShowContent').innerHTML='<div class="empty-state"><div class="icon">📅</div><p>No show assigned</p></div>';return;}
+  const d=new Date(j.date+'T12:00:00');
+  const dateStr=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const msDone=j.milestones.filter(m=>m.done).length;
+  const msTotal=j.milestones.length;
+  const nextMs=j.milestones.find(m=>!m.done);
+  const lead=j.crew.map(id=>CREW_DB.find(c=>c.id===id)).find(c=>c&&c.rank==='lead');
+  const manager=j.crew.map(id=>CREW_DB.find(c=>c.id===id)).find(c=>c&&c.rank==='management');
+
+  let html=`
+  <div class="card" style="margin-bottom:12px;border-color:var(--blue)33;">
+    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Your Show Today</div>
+    <div style="font-size:1.2rem;font-weight:800;">${j.client}</div>
+    <div style="font-size:.82rem;color:var(--muted);margin-top:2px;">📍 ${j.venue}</div>
+    <div style="font-size:.82rem;color:var(--muted);">📅 ${dateStr} · ⏰ Load-in ${formatTime(j.loadIn,j.tz||'America/Phoenix',{date:j.date})}</div>
+    <div style="margin-top:10px;display:flex;gap:12px;">
+      <div><div style="font-size:1rem;font-weight:800;color:var(--blue)">${msDone}/${msTotal}</div><div style="font-size:.65rem;color:var(--muted);">Milestones</div></div>
+      <div><div style="font-size:1rem;font-weight:800;color:var(--green)">$${j.budget.toLocaleString()}</div><div style="font-size:.65rem;color:var(--muted);">Show Budget</div></div>
+    </div>
+  </div>
+
+  ${nextMs?`<div class="card" style="margin-bottom:12px;border-color:var(--yellow)44;">
+    <div style="font-size:.7rem;color:var(--yellow);font-weight:700;text-transform:uppercase;letter-spacing:.08em;">⏳ Up Next</div>
+    <div style="font-size:1rem;font-weight:700;margin-top:4px;">${nextMs.name}</div>
+    <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="toggleMilestone('${j.id}',${j.milestones.indexOf(nextMs)});renderMyShow();">✅ Mark Complete</button>
+  </div>`:'<div class="card" style="border-color:var(--green)44;margin-bottom:12px;"><div style="color:var(--green);font-weight:700;">✅ All milestones complete!</div></div>'}
+
+  <div class="section-title">My Gear (Pull Sheet Status)</div>
+  ${['audio','lighting','power'].map(cat=>{
+    const items=j.pullSheet.filter(e=>e.cat===cat);
+    if(!items.length)return'';
+    const done=items.filter(e=>e.status!=='warehouse').length;
+    return `<div class="card" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:.82rem;font-weight:700;">${{audio:'🔊 Audio',lighting:'💡 Lighting',power:'⚡ Power & Structure'}[cat]}</span>
+        <span style="font-size:.75rem;color:${done===items.length?'var(--green)':'var(--muted)'};">${done}/${items.length} ready</span>
+      </div>
+      <div class="progress-bar" style="margin:6px 0 0"><div class="progress-fill" style="width:${items.length?Math.round(done/items.length*100):0}%"></div></div>
+    </div>`;
+  }).join('')}
+
+  <div class="section-title" style="margin-top:16px;">Your Team</div>
+  ${[manager,lead].filter(Boolean).map(c=>`
+    <div class="crew-card" onclick="openComms('${j.id}')">
+      <div class="crew-avatar" style="background:${c.color};color:${RANK_COLOR[c.rank]};width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;flex-shrink:0">${c.avatar}</div>
+      <div class="crew-info"><h4>${c.name} ${RANK_ICON[c.rank]}</h4><p style="font-size:.72rem">${c.role}</p></div>
+      <button class="btn btn-outline btn-sm">📬 Message</button>
+    </div>`).join('')}
+
+  <div class="section-title" style="margin-top:16px;">Show Communications</div>
+  <div style="margin-bottom:8px;">
+    ${(j.messages||[]).slice(-3).map(m=>{
+      const isMine=m.from==='lead';
+      return `<div style="display:flex;justify-content:${isMine?'flex-end':'flex-start'};margin-bottom:8px;">
+        <div style="max-width:82%;background:${isMine?'#1a2a3a':'#1a1d27'};border:1px solid ${isMine?'var(--blue)22':'var(--border)'};border-radius:12px;padding:8px 12px;">
+          <div style="font-size:.68rem;color:var(--muted);margin-bottom:3px;">${m.sender} · ${m.time}</div>
+          <div style="font-size:.85rem;">${m.text}</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+  <button class="btn btn-primary" style="width:100%" onclick="openComms('${j.id}')">📬 Open Comms</button>`;
+
+  document.getElementById('myShowContent').innerHTML=html;
+}
+
+// ============ CRM ============
+let clientFilter='';
+let clients = loadClients();
+
+function loadClients(){
+  try{return JSON.parse(localStorage.getItem('showrunr_clients')||'null')||defaultClients();}
+  catch{return defaultClients();}
+}
+function saveClients(){localStorage.setItem('showrunr_clients',JSON.stringify(clients));}
+
+function defaultClients(){
+  return [
+    {id:'cl1',name:'LIV Entertainment Group',contact:'Nathan',title:'Owner',phone:'310-699-9825',email:'nathan@liventertainment.com',city:'Culver City',state:'CA',type:'AV Company',source:'Warm Referral',rep:'Emmanuel Rivera',status:'prospect',notes:'Emmanuel\'s warm contact. Interested in Showrunr demo.',jobs:0,revenue:0,createdAt:'2026-03-17'},
+    {id:'cl2',name:'WOVA Event Technology',contact:'Ben',title:'Production Manager',phone:'310-659-5959',email:'ben@wova.com',city:'Los Angeles',state:'CA',type:'Event Production Agency',source:'Warm Referral',rep:'Emmanuel Rivera',status:'prospect',notes:'Warm contact. Specializes in LED video wall.',jobs:0,revenue:0,createdAt:'2026-03-17'},
+    {id:'cl3',name:'The One Up Group',contact:'Eyal',title:'CEO',phone:'310-666-2250',email:'eyal@oneupgroup.com',city:'West Hollywood',state:'CA',type:'Event Production Agency',source:'Warm Referral',rep:'Emmanuel Rivera',status:'prospect',notes:'Contacted 2026-03-17. Discovery call pending.',jobs:0,revenue:0,createdAt:'2026-03-17'},
+  ];
+}
+
+const CLIENT_STATUS_BADGE={prospect:'badge-gray',active:'badge-blue',proposal:'badge-yellow',closed:'badge-green',inactive:'badge-gray'};
+
+function renderCRM(){
+  const filtered=clients.filter(c=>!clientFilter||c.name.toLowerCase().includes(clientFilter.toLowerCase())||c.contact.toLowerCase().includes(clientFilter.toLowerCase()));
+  const total=clients.length;
+  const active=clients.filter(c=>c.status==='active'||c.status==='closed').length;
+  const totalRevenue=clients.reduce((s,c)=>s+(c.revenue||0),0);
+  document.getElementById('crmStats').innerHTML=`
+    <div class="stat-box"><div class="num" style="color:var(--blue)">${total}</div><div class="lbl">Clients</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--green)">${active}</div><div class="lbl">Active</div></div>
+    <div class="stat-box"><div class="num" style="color:var(--purple)">$${(totalRevenue/1000).toFixed(0)}k</div><div class="lbl">Revenue</div></div>`;
+  let html='';
+  if(!filtered.length){html='<div class="empty-state"><div class="icon">🏢</div><p>No clients yet</p></div>';}
+  filtered.forEach(c=>{
+    html+=`<div class="card" style="margin-bottom:10px;cursor:pointer;" onclick="openClientDetail('${c.id}')">
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:#1a2a3a;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0;">${c.name[0]}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-weight:700;font-size:.92rem;">${c.name}</span>
+            <span class="badge ${CLIENT_STATUS_BADGE[c.status]||'badge-gray'}">${c.status}</span>
+          </div>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:2px;">${c.contact}${c.title?' · '+c.title:''}</div>
+          <div style="font-size:.72rem;color:var(--muted);">${c.city?c.city+', ':''} ${c.state||''} · ${c.type}</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">Rep: ${c.rep||'Unassigned'}</div>
+          ${c.notes?`<div style="font-size:.72rem;color:var(--muted);margin-top:4px;font-style:italic;">"${c.notes.slice(0,80)}${c.notes.length>80?'...':''}"</div>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        ${c.phone?`<a href="tel:${c.phone}" onclick="event.stopPropagation()" class="btn btn-outline btn-sm">📞 Call</a>`:''}
+        ${c.email?`<a href="mailto:${c.email}" onclick="event.stopPropagation()" class="btn btn-outline btn-sm">✉️ Email</a>`:''}
+        <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();cycleClientStatus('${c.id}')">Status ↻</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('clientList').innerHTML=html;
+}
+
+function filterClients(v){clientFilter=v;renderCRM();}
+
+function cycleClientStatus(id){
+  const c=clients.find(x=>x.id===id);
+  const cycle=['prospect','proposal','active','closed','inactive'];
+  const i=cycle.indexOf(c.status);
+  c.status=cycle[(i+1)%cycle.length];
+  saveClients();renderCRM();toast(`${c.name} → ${c.status}`);
+}
+
+function openClientDetail(id){
+  const c=clients.find(x=>x.id===id);
+  if(!c)return;
+  // For demo: just show a toast with key info
+  toast(`${c.name} · ${c.contact} · ${c.phone||c.email||''}`);
+}
+
+function openNewClient(){
+  document.getElementById('newClientModal').classList.remove('hidden');
+  // Re-populate rep dropdown in case SALES_DB changed
+  document.getElementById('cRep').innerHTML=SALES_DB.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+}
+function closeNewClient(){document.getElementById('newClientModal').classList.add('hidden');}
+function saveNewClient(){
+  const c={
+    id:'cl'+Date.now(),
+    name:document.getElementById('cName').value.trim()||'New Client',
+    contact:document.getElementById('cContact').value.trim(),
+    title:document.getElementById('cTitle').value.trim(),
+    phone:document.getElementById('cPhone').value.trim(),
+    email:document.getElementById('cEmail').value.trim(),
+    address:document.getElementById('cAddress').value.trim(),
+    city:document.getElementById('cCity').value.trim(),
+    state:document.getElementById('cState').value.trim(),
+    type:document.getElementById('cType').value,
+    source:document.getElementById('cSource').value,
+    rep:document.getElementById('cRep').value,
+    status:document.getElementById('cStatus').value,
+    notes:document.getElementById('cNotes').value.trim(),
+    jobs:0,revenue:0,
+    createdAt:new Date().toISOString().split('T')[0],
+  };
+  clients.unshift(c);
+  saveClients();closeNewClient();renderCRM();
+  toast(`✅ ${c.name} added to CRM`);
+}
+
+// ============ ONBOARDING ============
+const ROLES_BY_DEPT = {
+  audio:      ['A1 Audio Engineer','A2 Audio Engineer','FOH Engineer','Monitor Engineer','RF / Wireless Tech','Playback Tech','Systems Engineer','Cable Tech','Audio Assistant','Stage Hand'],
+  lighting:   ['Lighting Director','Lighting Lead','Spot Operator','Rigging Lead','Uplight Tech','Staging Assistant','DMX Programmer','Follow Spot Op','Lighting Assistant'],
+  warehouse:  ['Warehouse Lead','Truck Driver','Gear Tech','Inventory Specialist','Load / Unload Crew','Gear Runner','Warehouse Tech'],
+  management: ['Production Manager','Show Director','Operations Manager','Project Manager','Event Coordinator','Tour Manager','Stage Manager'],
+  band:       ['DJ','Vocalist','Saxophonist','Drummer','Percussionist','Violinist','Flutist','Cellist','Guitarist','Bassist','Keyboardist','MC / Host','Music Director'],
+  sales:      ['Sales Director','Senior Account Executive','Account Executive','Sales Coordinator','Client Relations Manager'],
+};
+
+let obStep=1;
+
+function openOnboarding(){
+  obStep=1;
+  populateTzSelect('obTz', tzSettings.local);
+  updateObRoles();
+  showObPage(1);
+  document.getElementById('onboardingModal').classList.remove('hidden');
+}
+function closeOnboarding(){document.getElementById('onboardingModal').classList.add('hidden');}
+
+function showObPage(n){
+  [1,2,3,4].forEach(i=>{
+    document.getElementById('obPage'+i).style.display=i===n?'block':'none';
+    const step=document.getElementById('obStep'+i);
+    step.style.background=i===n?'#1a2a3a':i<n?'#1a3a1a':'var(--card)';
+    step.style.color=i===n?'var(--blue)':i<n?'var(--green)':'var(--muted)';
+  });
+  obStep=n;
+  if(n===4) renderObSummary();
+}
+
+function obNext(n){showObPage(n);}
+
+function updateObRoles(){
+  const dept=document.getElementById('obDept')?.value||'audio';
+  const sel=document.getElementById('obRole');
+  if(!sel)return;
+  const roles=ROLES_BY_DEPT[dept]||ROLES_BY_DEPT.audio;
+  sel.innerHTML=roles.map(r=>`<option>${r}</option>`).join('');
+}
+
+function renderObSummary(){
+  const first=document.getElementById('obFirst').value.trim()||'—';
+  const last=document.getElementById('obLast').value.trim()||'—';
+  const phone=document.getElementById('obPhone').value.trim()||'—';
+  const email=document.getElementById('obEmail').value.trim()||'—';
+  const dept=document.getElementById('obDept').value;
+  const rank=document.getElementById('obRank').value;
+  const role=document.getElementById('obRole').value;
+  const years=document.getElementById('obYears').value;
+  const skills=document.getElementById('obSkills').value.trim();
+  const payType=document.getElementById('obPayType').value;
+  const payRate=document.getElementById('obPayRate').value;
+  const tz=document.getElementById('obTz').value;
+  const tzLabel=TZ_LIST.find(t=>t.tz===tz)?.label||tz;
+  const docs=[...document.querySelectorAll('.ob-doc')];
+  const checkedDocs=docs.filter(d=>d.checked).map(d=>d.dataset.doc);
+  const pendingDocs=docs.filter(d=>!d.checked).map(d=>d.dataset.doc);
+  const byEl=document.getElementById('obBy');
+  const onboardedBy=byEl?byEl.value:'—';
+  const avatar=(first[0]||'?')+(last[0]||'?');
+
+  document.getElementById('obSummary').innerHTML=`
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#1a2a3a;color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;">${avatar.toUpperCase()}</div>
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;">${first} ${last}</div>
+          <div style="font-size:.78rem;color:var(--muted);">${role} · ${RANK_ICON[rank]||''} ${rank}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.78rem;">
+        <div><span style="color:var(--muted);">Phone</span><br>${phone}</div>
+        <div><span style="color:var(--muted);">Email</span><br>${email||'—'}</div>
+        <div><span style="color:var(--muted);">Department</span><br>${DEPT_ICON[dept]||''} ${dept}</div>
+        <div><span style="color:var(--muted);">Experience</span><br>${years}</div>
+        <div><span style="color:var(--muted);">Pay</span><br>${payType==='gig'?'Gig Rate':payType==='day'?'Day Rate':'Salary'}${payRate?' · $'+payRate:''}</div>
+        <div><span style="color:var(--muted);">Timezone</span><br>${tzLabel}</div>
+      </div>
+      ${skills?`<div style="margin-top:8px;font-size:.75rem;"><span style="color:var(--muted);">Skills: </span>${skills}</div>`:''}
+    </div>
+    <div class="card">
+      <div style="font-size:.75rem;font-weight:700;margin-bottom:8px;">Compliance Checklist</div>
+      ${checkedDocs.map(d=>`<div style="font-size:.78rem;color:var(--green);padding:3px 0;">✅ ${d}</div>`).join('')}
+      ${pendingDocs.map(d=>`<div style="font-size:.78rem;color:var(--yellow);padding:3px 0;">⏳ ${d}</div>`).join('')}
+      <div style="margin-top:8px;font-size:.72rem;color:var(--muted);">Onboarded by: ${onboardedBy} · ${new Date().toLocaleDateString()}</div>
+    </div>`;
+}
+
+function submitOnboarding(){
+  const first=document.getElementById('obFirst').value.trim()||'New';
+  const last=document.getElementById('obLast').value.trim()||'Crew';
+  const phone=document.getElementById('obPhone').value.trim();
+  const email=document.getElementById('obEmail').value.trim();
+  const dept=document.getElementById('obDept').value;
+  const rank=document.getElementById('obRank').value;
+  const role=document.getElementById('obRole').value;
+  const skills=document.getElementById('obSkills').value.trim();
+  const payType=document.getElementById('obPayType').value;
+  const payRate=document.getElementById('obPayRate').value;
+  const tz=document.getElementById('obTz').value;
+  const byEl=document.getElementById('obBy');
+  const onboardedBy=byEl?byEl.value:'—';
+  const docs=[...document.querySelectorAll('.ob-doc')];
+  const checkedDocs=docs.filter(d=>d.checked).map(d=>d.dataset.doc);
+  const pendingDocs=docs.filter(d=>!d.checked).map(d=>d.dataset.doc);
+
+  const newId='n'+Date.now();
+  const avatar=(first[0]||'?')+(last[0]||'?');
+  const newMember={
+    id:newId,
+    name:`${first} ${last}`,
+    rank,dept,role,
+    avatar:avatar.toUpperCase(),
+    color:dept==='audio'?'#1a2a3a':dept==='lighting'?'#1a1a3a':dept==='warehouse'?'#1a3a2a':dept==='band'?'#2a1a2a':'#2a1a3a',
+    phone,email,skills,payType,payRate,tz,
+    onboardedBy,onboardedAt:new Date().toISOString(),
+    compliance:{checked:checkedDocs,pending:pendingDocs},
+    status:'active',
+  };
+  CREW_DB.push(newMember);
+  // Persist new members to localStorage separately
+  const customCrew=JSON.parse(localStorage.getItem('showrunr_crew')||'[]');
+  customCrew.push(newMember);
+  localStorage.setItem('showrunr_crew',JSON.stringify(customCrew));
+  closeOnboarding();
+  renderCrew();
+  toast(`✅ ${first} ${last} added to roster!`);
+}
+
+function toggleCrewRoster(){
+  const el=document.getElementById('crewRoster');
+  const show=el.style.display==='none';
+  el.style.display=show?'block':'none';
+  if(!show)return;
+  // Show full roster grouped by dept
+  const depts={management:'⭐ Management',audio:'🔊 Audio',lighting:'💡 Lighting',warehouse:'🚛 Warehouse',band:'🎵 Band',sales:'💼 Sales'};
+  let html='<div class="section-title">Full Roster — '+CREW_DB.length+' Members</div>';
+  Object.keys(depts).forEach(dept=>{
+    const members=CREW_DB.filter(c=>c.dept===dept);
+    if(!members.length)return;
+    html+=`<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:12px 0 6px;">${depts[dept]} (${members.length})</div>`;
+    members.forEach(c=>{
+      const pendingCount=(c.compliance?.pending||[]).length;
+      html+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)22;">
+        <div style="width:32px;height:32px;border-radius:50%;background:${c.color};color:${RANK_COLOR[c.rank]||'var(--blue)'};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.72rem;flex-shrink:0;">${c.avatar}</div>
+        <div style="flex:1;">
+          <div style="font-size:.85rem;font-weight:600;">${c.name} <span style="color:${RANK_COLOR[c.rank]};font-size:.65rem;">${RANK_ICON[c.rank]||''}</span></div>
+          <div style="font-size:.7rem;color:var(--muted);">${c.role}</div>
+        </div>
+        ${pendingCount>0?`<span style="font-size:.65rem;background:#2a2a1a;color:var(--yellow);padding:2px 7px;border-radius:10px;">${pendingCount} pending</span>`:'<span style="font-size:.65rem;color:var(--green);">✅</span>'}
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+
+// Load any previously onboarded custom crew
+(function loadCustomCrew(){
+  try{
+    const custom=JSON.parse(localStorage.getItem('showrunr_crew')||'[]');
+    custom.forEach(c=>{if(!CREW_DB.find(x=>x.id===c.id))CREW_DB.push(c);});
+  }catch{}
+})();
+
+// ============ TIMEZONE ============
+const TZ_LIST = [
+  // Americas
+  {label:'Hawaii (HST)',          tz:'Pacific/Honolulu'},
+  {label:'Alaska (AKST)',         tz:'America/Anchorage'},
+  {label:'Pacific (PST/PDT)',     tz:'America/Los_Angeles'},
+  {label:'Mountain (MST/MDT)',    tz:'America/Denver'},
+  {label:'Mountain - AZ (MST)',   tz:'America/Phoenix'},
+  {label:'Central (CST/CDT)',     tz:'America/Chicago'},
+  {label:'Eastern (EST/EDT)',     tz:'America/New_York'},
+  {label:'Atlantic (AST)',        tz:'America/Halifax'},
+  {label:'São Paulo (BRT)',       tz:'America/Sao_Paulo'},
+  {label:'Buenos Aires (ART)',    tz:'America/Argentina/Buenos_Aires'},
+  // Europe
+  {label:'London (GMT/BST)',      tz:'Europe/London'},
+  {label:'Paris / Berlin (CET)',  tz:'Europe/Paris'},
+  {label:'Helsinki (EET)',        tz:'Europe/Helsinki'},
+  {label:'Moscow (MSK)',          tz:'Europe/Moscow'},
+  // Africa
+  {label:'Lagos (WAT)',           tz:'Africa/Lagos'},
+  {label:'Nairobi (EAT)',         tz:'Africa/Nairobi'},
+  {label:'Johannesburg (SAST)',   tz:'Africa/Johannesburg'},
+  {label:'Cairo (EET)',           tz:'Africa/Cairo'},
+  // Middle East
+  {label:'Dubai (GST)',           tz:'Asia/Dubai'},
+  {label:'Riyadh (AST)',          tz:'Asia/Riyadh'},
+  {label:'Tel Aviv (IST)',        tz:'Asia/Jerusalem'},
+  // Asia
+  {label:'Karachi (PKT)',         tz:'Asia/Karachi'},
+  {label:'Mumbai (IST)',          tz:'Asia/Kolkata'},
+  {label:'Bangkok (ICT)',         tz:'Asia/Bangkok'},
+  {label:'Singapore (SGT)',       tz:'Asia/Singapore'},
+  {label:'Hong Kong (HKT)',       tz:'Asia/Hong_Kong'},
+  {label:'Tokyo (JST)',           tz:'Asia/Tokyo'},
+  {label:'Seoul (KST)',           tz:'Asia/Seoul'},
+  // Pacific
+  {label:'Sydney (AEDT)',         tz:'Australia/Sydney'},
+  {label:'Auckland (NZST)',       tz:'Pacific/Auckland'},
+];
+
+// World clock cities to show in TZ modal
+const WORLD_CLOCK_CITIES=[
+  {label:'Phoenix',    tz:'America/Phoenix'},
+  {label:'New York',   tz:'America/New_York'},
+  {label:'London',     tz:'Europe/London'},
+  {label:'Dubai',      tz:'Asia/Dubai'},
+  {label:'Singapore',  tz:'Asia/Singapore'},
+  {label:'Tokyo',      tz:'Asia/Tokyo'},
+  {label:'Sydney',     tz:'Australia/Sydney'},
+  {label:'Nairobi',    tz:'Africa/Nairobi'},
+];
+
+let tzSettings = loadTzSettings();
+
+function loadTzSettings(){
+  try{return JSON.parse(localStorage.getItem('showrunr_tz')||'null')||{local:Intl.DateTimeFormat().resolvedOptions().timeZone,showLocal:false};}
+  catch{return {local:Intl.DateTimeFormat().resolvedOptions().timeZone,showLocal:false};}
+}
+function saveTzSettings(){
+  tzSettings.local=document.getElementById('tzLocal').value;
+  tzSettings.showLocal=document.getElementById('tzShowLocal').checked;
+  localStorage.setItem('showrunr_tz',JSON.stringify(tzSettings));
+  updateTzBtn();
+}
+function updateTzBtn(){
+  const entry=TZ_LIST.find(t=>t.tz===tzSettings.local);
+  const abbr=entry?entry.label.match(/\(([^)]+)\)/)?.[1]||'TZ':'TZ';
+  document.getElementById('tzBtn').textContent=`🌍 ${abbr}`;
+}
+
+function formatTime(timeStr, venueTz, opts={}){
+  // timeStr: 'HH:MM' or a full timestamp string
+  // venueTz: IANA tz string for the venue
+  // Returns formatted string, optionally with local conversion
+  if(!timeStr) return timeStr;
+  const showBoth = tzSettings.showLocal && venueTz && venueTz !== tzSettings.local;
+
+  // Build a Date object for today with the given time
+  const isFullTs = timeStr.includes(':') && timeStr.length > 5;
+  let dt;
+  if(isFullTs){
+    // Already a rich time string like "8:02 AM" — just return as-is for now
+    return timeStr;
+  }
+  // HH:MM format — combine with a reference date
+  const refDate = opts.date || new Date().toISOString().split('T')[0];
+  try {
+    dt = new Date(`${refDate}T${timeStr}:00`);
+  } catch { return timeStr; }
+  if(isNaN(dt)) return timeStr;
+
+  const fmtIn = (tz) => dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:tz,timeZoneName:'short'});
+  const venueStr = venueTz ? fmtIn(venueTz) : timeStr;
+  if(!showBoth) return venueStr;
+  const localStr = fmtIn(tzSettings.local);
+  if(localStr===venueStr) return venueStr;
+  return `${venueStr} <span style="color:var(--muted);font-size:.85em">(${localStr} local)</span>`;
+}
+
+function populateTzSelect(elId, selected){
+  const sel=document.getElementById(elId);
+  if(!sel)return;
+  sel.innerHTML=TZ_LIST.map(t=>`<option value="${t.tz}"${t.tz===selected?' selected':''}>${t.label}</option>`).join('');
+}
+
+function openTzModal(){
+  populateTzSelect('tzLocal', tzSettings.local);
+  document.getElementById('tzShowLocal').checked=tzSettings.showLocal;
+  renderWorldClock();
+  document.getElementById('tzModal').classList.remove('hidden');
+}
+function closeTzModal(){document.getElementById('tzModal').classList.add('hidden');}
+
+function renderWorldClock(){
+  const now=new Date();
+  const html=`<div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;">World Clock</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    ${WORLD_CLOCK_CITIES.map(c=>{
+      const t=now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:c.tz});
+      const d=now.toLocaleDateString('en-US',{weekday:'short',timeZone:c.tz});
+      const isLocal=c.tz===tzSettings.local;
+      return `<div style="background:#13151f;border:1px solid ${isLocal?'var(--blue)44':'var(--border)'};border-radius:8px;padding:8px 10px;">
+        <div style="font-size:.72rem;color:${isLocal?'var(--blue)':'var(--muted)'};">${c.label}${isLocal?' ★':''}</div>
+        <div style="font-size:1rem;font-weight:700;">${t}</div>
+        <div style="font-size:.65rem;color:var(--muted);">${d}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+  document.getElementById('tzWorldClock').innerHTML=html;
+}
+
+// Populate TZ dropdown in new job modal
+function initNewJobTz(){
+  const detected=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  populateTzSelect('fTz', detected);
+}
+
+// ============ INIT ============
+// Force reset if crew IDs are from old schema
+(function(){
+  try{
+    const s=JSON.parse(localStorage.getItem('showrunr_state')||'{}');
+    // Reset if old schema (no rollingTo/From, old client names, or wrong job count)
+    const needsReset=!s.jobs||s.jobs.length<6||!('rollingTo' in (s.jobs[0]||{}));
+    if(needsReset)localStorage.removeItem('showrunr_state');
+  }catch{}
+  state=loadState();
+})();
+updateTzBtn();
+// Start at login screen — don't render until role is selected
+</script>
+</body>
+</html>
