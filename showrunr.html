@@ -1030,8 +1030,8 @@ function renderJobs(){
     jobs.forEach(j=>html+=jobCard(j));
   });
   el.innerHTML=html||'<div class="empty-state"><div class="icon">📅</div><p>No jobs yet</p></div>';
-  const active=state.jobs.filter(j=>j.status!=='completed').length;
-  document.getElementById('headerSub').textContent=state.jobs.length+' Shows This Week';
+  const headerSub=document.getElementById('headerSub');
+  if(headerSub) headerSub.textContent=state.jobs.length+' Shows This Week';
 }
 function rollingBadge(j){
   if(!j.rollingTo&&!j.rollingFrom) return '';
