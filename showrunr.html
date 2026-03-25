@@ -1983,19 +1983,24 @@ function setRole(role){
   document.getElementById('app').style.flexDirection='column';
   document.getElementById('app').style.height='100vh';
   document.getElementById('mainNav').style.display='flex';
-  document.getElementById('fab').style.display='flex';
   // Role badge
   const badge = document.getElementById('roleBadge');
   badge.textContent = r.icon+' '+r.label;
   badge.style.background = r.bg;
   badge.style.color = r.color;
   badge.style.border = `1px solid ${r.color}44`;
-  // Build nav
+  // Build nav first, then switch to first tab using the now-rendered button
   buildNav(role);
-  // Default tab
   const firstTab = NAV_BY_ROLE[role][0].tab;
   const firstBtn = document.querySelector('#mainNav .nav-btn');
-  switchTab(firstTab, firstBtn);
+  currentTab = firstTab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const tabEl = document.getElementById('tab-'+firstTab);
+  if(tabEl) tabEl.classList.add('active');
+  if(firstBtn) firstBtn.classList.add('active');
+  // FAB: show only on jobs tab for non-crew
+  document.getElementById('fab').style.display=(firstTab==='jobs'&&role!=='crew')?'flex':'none';
+  renderTab(firstTab);
 }
 
 function buildNav(role){
