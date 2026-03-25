@@ -282,10 +282,10 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 </div>
 
 <!-- BOTTOM NAV (rendered dynamically per role) -->
-<nav class="nav" id="mainNav"></nav>
+<nav class="nav" id="mainNav" style="display:none;"></nav>
 
 <!-- FAB -->
-<button class="fab" onclick="openNewJob()" id="fab" title="New Job">+</button>
+<button class="fab" onclick="openNewJob()" id="fab" title="New Job" style="display:none;">+</button>
 
 <!-- NEW JOB MODAL -->
 <div class="modal-overlay hidden" id="newJobModal">
@@ -1982,6 +1982,8 @@ function setRole(role){
   document.getElementById('app').style.display='flex';
   document.getElementById('app').style.flexDirection='column';
   document.getElementById('app').style.height='100vh';
+  document.getElementById('mainNav').style.display='flex';
+  document.getElementById('fab').style.display='flex';
   // Role badge
   const badge = document.getElementById('roleBadge');
   badge.textContent = r.icon+' '+r.label;
@@ -2010,6 +2012,8 @@ function logout(){
   currentRole=null;
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('app').style.display='none';
+  document.getElementById('mainNav').style.display='none';
+  document.getElementById('fab').style.display='none';
 }
 
 // ============ MY SHOW (CREW VIEW) ============
