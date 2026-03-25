@@ -150,6 +150,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
   .login-logo,.login-tagline,.login-role-label,.login-demo-note{text-align:center;}
 }
 </style>
+<div id="debugBar" style="display:none;position:fixed;top:0;left:0;right:0;background:#f87171;color:#000;font-size:.75rem;padding:8px 12px;z-index:9999;word-break:break-all;"></div>
 <div id="loginScreen">
   <div class="login-inner">
 
@@ -1974,6 +1975,12 @@ let currentRole = null;
     window.addEventListener('DOMContentLoaded', function(){ setRole(p); });
   }
 })();
+
+window.onerror = function(msg, src, line, col, err) {
+  const bar = document.getElementById('debugBar');
+  if(bar){ bar.style.display='block'; bar.textContent = '❌ JS ERROR: ' + msg + ' (line '+line+')'; }
+  return false;
+};
 
 function setRole(role){
   currentRole = role;
