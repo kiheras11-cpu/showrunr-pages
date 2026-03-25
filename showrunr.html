@@ -137,10 +137,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <!-- LOGIN SCREEN -->
 <style>
 #loginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;overflow-y:auto;display:flex;align-items:center;justify-content:center;padding:32px 24px;}
-.login-inner{display:flex;align-items:center;gap:60px;width:100%;max-width:900px;}
-.login-demo-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:14px;}
-.login-demo-col iframe{width:280px;height:538px;border:none;border-radius:28px;box-shadow:0 0 0 1px #2a2d3a,0 32px 64px rgba(0,0,0,.8);flex-shrink:0;}
-.login-demo-label{font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;color:var(--blue);font-weight:700;opacity:.7;}
+.login-inner{display:flex;align-items:center;justify-content:center;width:100%;max-width:480px;}
 .login-cards-col{flex:1;display:flex;flex-direction:column;align-items:flex-start;}
 .login-logo{font-size:2rem;font-weight:900;letter-spacing:.05em;margin-bottom:4px;}
 .login-logo span{color:var(--blue);}
@@ -148,7 +145,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .login-role-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px;}
 .login-demo-note{margin-top:20px;font-size:.7rem;color:var(--muted);}
 @media(max-width:700px){
-  .login-inner{flex-direction:column;gap:32px;align-items:center;}
+  .login-inner{flex-direction:column;align-items:center;}
   .login-cards-col{align-items:center;width:100%;}
   .login-logo,.login-tagline,.login-role-label,.login-demo-note{text-align:center;}
 }
@@ -156,13 +153,7 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 <div id="loginScreen">
   <div class="login-inner">
 
-    <!-- Left: phone demo -->
-    <div class="login-demo-col">
-      <iframe src="demo.html" scrolling="no" title="Showrunr Demo"></iframe>
-      <div class="login-demo-label">Live demo — watch it work</div>
-    </div>
-
-    <!-- Right: branding + role cards -->
+    <!-- Role selection -->
     <div class="login-cards-col">
       <div class="login-logo"><span>Show</span>runr ⚡</div>
       <div class="login-tagline">Event Production Platform</div>
