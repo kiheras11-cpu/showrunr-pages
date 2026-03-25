@@ -844,7 +844,7 @@ const CREW_STATUS_CYCLE = ['assigned','confirmed','on-site'];
 const CREW_STATUS_BADGE = {assigned:'badge-gray',confirmed:'badge-blue','on-site':'badge-green'};
 
 // ============ STATE ============
-let state = loadState();
+let state;
 
 // Random client/venue name pools (neutral — no favorites)
 const CLIENTS=['Pinnacle Events','Apex Productions','Summit AV','Horizon Event Group','Crest Productions','Meridian Events','Altitude AV','Keystone Entertainment','Vanguard Productions','Landmark Events'];
@@ -2513,8 +2513,9 @@ function initNewJobTz(){
     const needsReset=!s.jobs||s.jobs.length<6||!('rollingTo' in (s.jobs[0]||{}));
     if(needsReset)localStorage.removeItem('showrunr_state');
   }catch{}
-  state=loadState();
+  state = loadState();
 })();
+
 updateTzBtn();
 // Start at login screen — don't render until role is selected
 </script>
